@@ -1,0 +1,608 @@
+<title>1screen.ru — макет медиа о рекламе и маркетинге</title>
+<style>
+  :root {
+    /* neutrals — soft, slightly warm off-white paper, softened dark ink (no pure black) */
+    --paper: #f7f5f0;
+    --paper-alt: #f0ede5;
+    --paper-sunk: #e9e5db;
+    --surface: #fcfbf8;
+    --ink: #26262a;
+    --ink-soft: #585862;
+    --ink-muted: #8f8d8c;
+    --line: #e3ded3;
+    --line-strong: #d2ccbe;
+
+    /* single accent, driven by --accent-src (palette switch changes only this) */
+    --accent-src: #14636b;   /* Петроль (teal) — выбранная палитра проекта */
+    --accent: var(--accent-src);
+    --accent-hover: color-mix(in srgb, var(--accent-src) 80%, #000);
+    --accent-tint: color-mix(in srgb, var(--accent-src) 10%, var(--paper));
+
+    --serif: Georgia, "PT Serif", "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+    --maxw: 1160px;
+    --measure: 720px;
+    --chrome-h: 46px;
+    --header-h: 66px;
+    --radius: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #17150f; --paper-alt: #1e1b14; --paper-sunk: #131009; --surface: #211d16;
+      --ink: #ece7dd; --ink-soft: #b6afa1; --ink-muted: #8b8477;
+      --line: #2f291f; --line-strong: #3d3627;
+      --accent: color-mix(in srgb, var(--accent-src) 58%, #efe9dd);
+      --accent-hover: color-mix(in srgb, var(--accent-src) 72%, #fff);
+      --accent-tint: color-mix(in srgb, var(--accent-src) 24%, #14110c);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #f7f5f0; --paper-alt: #f0ede5; --paper-sunk: #e9e5db; --surface: #fcfbf8;
+    --ink: #26262a; --ink-soft: #585862; --ink-muted: #8f8d8c;
+    --line: #e3ded3; --line-strong: #d2ccbe;
+    --accent: var(--accent-src);
+    --accent-hover: color-mix(in srgb, var(--accent-src) 80%, #000);
+    --accent-tint: color-mix(in srgb, var(--accent-src) 10%, #f7f5f0);
+  }
+  :root[data-theme="dark"] {
+    --paper: #17150f; --paper-alt: #1e1b14; --paper-sunk: #131009; --surface: #211d16;
+    --ink: #ece7dd; --ink-soft: #b6afa1; --ink-muted: #8b8477;
+    --line: #2f291f; --line-strong: #3d3627;
+    --accent: color-mix(in srgb, var(--accent-src) 58%, #efe9dd);
+    --accent-hover: color-mix(in srgb, var(--accent-src) 72%, #fff);
+    --accent-tint: color-mix(in srgb, var(--accent-src) 24%, #14110c);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans);
+    line-height: 1.5; padding-top: var(--chrome-h); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ============ MOCKUP CHROME ============ */
+  .mock-chrome { position: fixed; top: 0; left: 0; right: 0; height: var(--chrome-h); z-index: 200;
+    background: #17140f; color: #e8e2d6; display: flex; align-items: center; gap: 14px;
+    padding: 0 16px; border-bottom: 1px solid #322c22; font-size: 12.5px; }
+  .mock-chrome .mc-label { font-weight: 600; white-space: nowrap; }
+  .mock-chrome .mc-note { color: #8f877a; font-size: 11.5px; white-space: nowrap; }
+  .mock-switch { display: flex; gap: 6px; margin-left: auto; }
+  .mock-switch button { font: inherit; font-size: 12.5px; font-weight: 600; color: #cfc7b8;
+    background: transparent; border: 1px solid #3a3428; border-radius: 999px; padding: 5px 14px;
+    cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+  .mock-switch button:hover { color: #fff; border-color: #554d3d; }
+  .mock-switch button[aria-selected="true"] { background: var(--accent-src); color: #fff; border-color: var(--accent-src); }
+  @media (max-width: 660px) { .mock-chrome .mc-note { display: none; } .mock-chrome { gap: 8px; padding: 0 10px; } }
+
+  .view { display: none; }
+  .view.is-active { display: block; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 26px; }
+  @media (max-width: 640px) { .wrap { padding: 0 18px; } }
+
+  /* ============ HEADER ============ */
+  .site-header { position: sticky; top: var(--chrome-h); z-index: 100;
+    background: color-mix(in srgb, var(--paper) 90%, transparent); backdrop-filter: saturate(1.3) blur(8px);
+    border-bottom: 1px solid var(--line); }
+  .site-header .bar { height: var(--header-h); display: flex; align-items: center; gap: 28px; }
+  .logo { display: flex; align-items: center; gap: 12px; font-family: var(--serif); }
+  .logo .wordmark { display: inline-flex; align-items: baseline; }
+  .logo .mark { font-size: 27px; font-weight: 700; letter-spacing: -.025em; color: var(--ink); }
+  .logo .mark .one { color: var(--accent); }
+  .logo .tld { font-family: var(--sans); font-size: 12.5px; font-weight: 650; color: var(--ink-muted);
+    letter-spacing: 0; margin-left: 1px; }
+  /* «расширение» логотипа — дескриптор медиа */
+  .logo .tagline { font-family: var(--sans); font-size: 10.5px; font-weight: 600; line-height: 1.28;
+    letter-spacing: .05em; text-transform: uppercase; color: var(--ink-muted);
+    padding-left: 12px; border-left: 1px solid var(--line-strong); white-space: nowrap; }
+  .nav { display: flex; align-items: center; gap: 24px; }
+  .nav a { font-family: var(--sans); font-size: 14px; font-weight: 550; color: var(--ink-soft);
+    padding: 6px 0; position: relative; letter-spacing: .01em; }
+  .nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 0; height: 2px;
+    background: var(--accent); transition: right .2s ease; }
+  .nav a:hover { color: var(--ink); } .nav a:hover::after { right: 0; }
+  .nav a.has-caret::before { content: "▾"; font-size: 9px; color: var(--ink-muted); margin-right: 4px; }
+  .header-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
+    background: transparent; color: var(--ink-soft); cursor: pointer; display: grid; place-items: center;
+    transition: border-color .15s, color .15s; }
+  .icon-btn:hover { border-color: var(--line-strong); color: var(--ink); }
+  .icon-btn svg { width: 17px; height: 17px; }
+  .btn-cta { font-family: var(--sans); font-size: 13.5px; font-weight: 650; background: var(--accent);
+    color: #fff; border: none; border-radius: 4px; padding: 9px 16px; cursor: pointer; transition: background .15s; }
+  .btn-cta:hover { background: var(--accent-hover); }
+  .burger { display: none; }
+  /* прячем дескриптор в тесной зоне (нав + лого рядом) и на очень узких экранах */
+  @media (max-width: 1120px) and (min-width: 901px) { .logo .tagline { display: none; } }
+  @media (max-width: 560px) { .logo .tagline { display: none; } }
+  @media (max-width: 900px) { .nav { display: none; } .btn-cta.header-cta { display: none; } .burger { display: grid; } }
+
+  /* ============ CATEGORY EYEBROW (text only, single accent) ============ */
+  .badge { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 11px;
+    font-weight: 700; letter-spacing: .11em; text-transform: uppercase; color: var(--accent); }
+  .badge .geo { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .02em;
+    color: var(--ink-muted); border: 1px solid var(--line-strong); border-radius: 3px; padding: 1px 5px; }
+  .fresh { color: var(--accent); font-weight: 650; }
+
+  /* ============ HOME ============ */
+  .home-section { padding: 50px 0; }
+  .home-section + .home-section { border-top: 1px solid var(--line); }
+  .home-section.alt { background: var(--paper-alt); }
+
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; }
+  .sec-head h2 { font-family: var(--sans); font-size: 13px; font-weight: 750; letter-spacing: .13em;
+    text-transform: uppercase; margin: 0; color: var(--ink); }
+  .sec-head .rule { flex: 1; height: 1px; background: var(--line); }
+  .sec-head a.more { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .sec-head a.more:hover { color: var(--accent-hover); }
+
+  /* hero (text-first; optional image can slot above headline later) */
+  .hero-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 52px; align-items: start; }
+  .hero-main .eyebrow { margin-bottom: 14px; }
+  .hero-main h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(2.3rem, 4.2vw, 3.4rem);
+    line-height: 1.1; letter-spacing: -.016em; margin: 0 0 18px; text-wrap: balance; color: var(--ink); cursor: pointer; }
+  .hero-main h1:hover { color: var(--accent); }
+  .hero-main .lead { font-family: var(--serif); font-size: 20px; line-height: 1.6; color: var(--ink-soft);
+    margin: 0 0 20px; max-width: 40em; }
+  .meta-row { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; font-family: var(--sans);
+    font-size: 13px; color: var(--ink-muted); }
+  .meta-row .sep { opacity: .5; }
+  .meta-row strong { color: var(--ink-soft); font-weight: 650; }
+
+  .hero-side { display: flex; flex-direction: column; }
+  .hero-side .side-head { font-family: var(--sans); font-size: 12px; font-weight: 750; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--ink); padding-bottom: 14px; border-bottom: 2px solid var(--ink); margin-bottom: 4px; }
+  .side-item { padding: 18px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .side-item:last-child { border-bottom: none; }
+  .side-item h3 { font-family: var(--serif); font-weight: 700; font-size: 18px; line-height: 1.3;
+    margin: 7px 0 6px; color: var(--ink); text-wrap: balance; }
+  .side-item:hover h3 { color: var(--accent); }
+  .side-item .m { font-family: var(--sans); font-size: 12px; color: var(--ink-muted); }
+  @media (max-width: 880px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    .hero-side { border-top: 1px solid var(--line); padding-top: 26px; }
+  }
+
+  /* two-column: feed + rail */
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 58px; align-items: start; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; gap: 44px; } }
+
+  .feed { display: flex; flex-direction: column; }
+  .feed-item { padding: 24px 0; border-top: 1px solid var(--line); cursor: pointer; }
+  .feed-item:first-child { border-top: none; padding-top: 0; }
+  .feed-item h3 { font-family: var(--serif); font-weight: 700; font-size: 24px; line-height: 1.24;
+    margin: 9px 0 9px; color: var(--ink); text-wrap: balance; }
+  .feed-item:hover h3 { color: var(--accent); }
+  .feed-item p { font-family: var(--serif); font-size: 16px; line-height: 1.55; color: var(--ink-soft);
+    margin: 0 0 11px; max-width: 60ch; }
+  @media (max-width: 640px) { .feed-item h3 { font-size: 20px; } }
+
+  /* right rail */
+  .rail { display: flex; flex-direction: column; gap: 38px; }
+  .rail-mod .rail-title { font-family: var(--sans); font-size: 12px; font-weight: 750; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--ink); padding-bottom: 13px; border-bottom: 2px solid var(--ink); }
+  .rail-digest a.d-head { display: block; font-family: var(--serif); font-weight: 700; font-size: 19px;
+    line-height: 1.28; color: var(--ink); margin: 14px 0 12px; text-wrap: balance; }
+  .rail-digest a.d-head:hover { color: var(--accent); }
+  .digest-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .digest-list li { font-family: var(--serif); font-size: 14.5px; line-height: 1.4; color: var(--ink-soft);
+    display: flex; gap: 10px; align-items: baseline; }
+  .digest-list li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+    flex: none; transform: translateY(-2px); }
+  .pop-list { list-style: none; margin: 12px 0 0; padding: 0; counter-reset: pop; }
+  .pop-item { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start;
+    padding: 13px 0; border-top: 1px solid var(--line); cursor: pointer; }
+  .pop-item:first-child { border-top: none; }
+  .pop-item::before { counter-increment: pop; content: counter(pop); font-family: var(--serif); font-weight: 700;
+    font-size: 20px; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .pop-item h4 { font-family: var(--serif); font-weight: 650; font-size: 15px; line-height: 1.3; margin: 0;
+    color: var(--ink); }
+  .pop-item:hover h4 { color: var(--accent); }
+  .pop-item .pm { font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted); margin-top: 4px; }
+
+  /* opinions */
+  .opinions { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .op-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 30px; background: var(--surface);
+    display: flex; flex-direction: column; gap: 16px; cursor: pointer; transition: border-color .15s, transform .15s; }
+  .op-card:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+  .op-card blockquote { font-family: var(--serif); font-size: 22px; line-height: 1.38; margin: 0; color: var(--ink); text-wrap: pretty; }
+  .op-card:hover blockquote { color: var(--accent); }
+  .op-author { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; background: var(--accent); color: #fff;
+    display: grid; place-items: center; font-weight: 700; font-size: 14px; font-family: var(--serif); }
+  .op-author .who .n { font-family: var(--sans); font-size: 13.5px; font-weight: 650; color: var(--ink); }
+  .op-author .who .r { font-family: var(--sans); font-size: 12px; color: var(--ink-muted); }
+  @media (max-width: 700px) { .opinions { grid-template-columns: 1fr; } }
+
+  /* newsletter */
+  .newsletter { background: var(--paper-sunk); border-radius: var(--radius); padding: 46px; text-align: center; border: 1px solid var(--line); }
+  .newsletter h2 { font-family: var(--serif); font-weight: 700; font-size: clamp(1.65rem, 3vw, 2.15rem); margin: 0 0 12px; color: var(--ink); text-wrap: balance; }
+  .newsletter p { font-family: var(--serif); color: var(--ink-soft); font-size: 16px; margin: 0 auto 24px; max-width: 44em; line-height: 1.55; }
+  .nl-form { display: flex; gap: 10px; max-width: 460px; margin: 0 auto; }
+  .nl-form input { flex: 1; font: inherit; font-size: 15px; padding: 12px 15px; border: 1px solid var(--line-strong);
+    border-radius: 5px; background: var(--surface); color: var(--ink); }
+  .nl-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .nl-form button { font: inherit; font-weight: 650; font-size: 15px; background: var(--accent); color: #fff;
+    border: none; border-radius: 5px; padding: 12px 22px; cursor: pointer; white-space: nowrap; }
+  .nl-form button:hover { background: var(--accent-hover); }
+  .nl-note { font-family: var(--sans); font-size: 12px; color: var(--ink-muted); margin-top: 14px; }
+  @media (max-width: 520px) { .nl-form { flex-direction: column; } .newsletter { padding: 30px 22px; } }
+
+  /* footer */
+  .site-footer { background: var(--paper-alt); border-top: 1px solid var(--line); }
+  .footer-grid { display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 32px; padding: 50px 0 32px; }
+  .footer-brand .logo { margin-bottom: 14px; }
+  .footer-brand p { font-family: var(--serif); font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; max-width: 30em; margin: 0 0 18px; }
+  .socials { display: flex; gap: 8px; }
+  .socials a { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line-strong);
+    display: grid; place-items: center; color: var(--ink-soft); font-family: var(--sans); font-size: 11px; font-weight: 700; }
+  .socials a:hover { border-color: var(--accent); color: var(--accent); }
+  .fcol h4 { font-family: var(--sans); font-size: 11.5px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-muted); margin: 4px 0 15px; }
+  .fcol ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  .fcol a { font-family: var(--sans); font-size: 14px; color: var(--ink-soft); }
+  .fcol a:hover { color: var(--accent); }
+  .footer-bottom { border-top: 1px solid var(--line); padding: 18px 0; display: flex; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; font-family: var(--sans); font-size: 12.5px; color: var(--ink-muted); }
+  @media (max-width: 820px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+
+  /* ============ ARTICLE ============ */
+  .article-wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 26px; }
+  .breadcrumbs { font-family: var(--sans); font-size: 12.5px; color: var(--ink-muted); padding: 22px 0 0; display: flex; gap: 8px; flex-wrap: wrap; }
+  .breadcrumbs a:hover { color: var(--accent); }
+  .breadcrumbs .sep { opacity: .5; }
+  .article-col { max-width: var(--measure); margin: 0 auto; }
+  .article-head { padding: 28px 0 22px; }
+  .article-head h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(2.1rem, 4.6vw, 3.05rem);
+    line-height: 1.13; letter-spacing: -.016em; margin: 16px 0 20px; text-wrap: balance; color: var(--ink); }
+  .article-lead { font-family: var(--serif); font-style: italic; font-size: clamp(1.18rem, 2.2vw, 1.42rem);
+    line-height: 1.5; color: var(--ink-soft); margin: 0 0 24px; }
+  .article-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 17px 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-family: var(--sans);
+    font-size: 13.5px; color: var(--ink-muted); }
+  .article-meta .avatar { width: 38px; height: 38px; }
+  .article-meta .who .n { font-size: 14px; font-weight: 650; color: var(--ink); }
+  .article-meta .who .n a:hover { color: var(--accent); }
+  .article-meta .who .r { font-size: 12px; }
+  .article-meta .spacer { flex: 1; }
+  .article-meta .rt { font-family: var(--mono); font-size: 12.5px; }
+  .article-actions { display: flex; gap: 7px; }
+  .article-actions button { width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--line);
+    background: transparent; color: var(--ink-soft); cursor: pointer; display: grid; place-items: center;
+    font-family: var(--sans); font-size: 11px; font-weight: 700; }
+  .article-actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+  .article-body { font-family: var(--serif); font-size: 19px; line-height: 1.72; color: var(--ink); margin-top: 34px; }
+  .article-body > p { margin: 0 0 1.2em; }
+  .article-body > p:first-of-type::first-letter { font-size: 3.1em; float: left; line-height: .82; padding: 6px 10px 0 0; font-weight: 700; color: var(--accent); }
+  .article-body h2 { font-family: var(--sans); font-weight: 750; font-size: 1.5rem; line-height: 1.25; margin: 1.9em 0 .6em; color: var(--ink); letter-spacing: -.01em; }
+  .article-body h3 { font-family: var(--sans); font-weight: 700; font-size: 1.2rem; margin: 1.6em 0 .5em; color: var(--ink); }
+  .article-body a.inline { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+  .article-body a.inline:hover { color: var(--accent-hover); }
+  .article-body ul, .article-body ol { margin: 0 0 1.25em; padding-left: 1.3em; }
+  .article-body li { margin-bottom: .55em; }
+  .article-body strong { font-weight: 700; }
+  .callout { border-left: 3px solid var(--accent); background: var(--accent-tint); padding: 22px 26px; margin: 1.9em 0;
+    border-radius: 0 6px 6px 0; font-family: var(--serif); font-size: 20px; line-height: 1.45; color: var(--ink); }
+  .statblock { display: flex; align-items: baseline; gap: 20px; margin: 1.9em 0; padding: 24px 26px;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper-alt); }
+  .statblock .num { font-family: var(--serif); font-weight: 700; font-size: 3rem; line-height: 1; color: var(--accent);
+    font-variant-numeric: tabular-nums; flex: none; }
+  .statblock .desc { font-family: var(--sans); font-size: 14.5px; color: var(--ink-soft); line-height: 1.4; }
+  .cmp-wrap { overflow-x: auto; margin: 1.7em 0; }
+  .cmp-table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 14px; }
+  .cmp-table th, .cmp-table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .cmp-table th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted); font-weight: 700; }
+  .cmp-table td { color: var(--ink-soft); }
+  .cmp-table td:first-child { color: var(--ink); font-weight: 600; }
+  .cmp-table tr:hover td { background: var(--paper-alt); }
+  .source-box { margin: 2.3em 0 1.5em; padding: 16px 19px; background: var(--paper-alt); border-radius: 6px;
+    font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft); display: flex; gap: 8px; align-items: baseline; }
+  .source-box a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.7em 0 2em; }
+  .tag-list a { font-family: var(--sans); font-size: 13px; color: var(--ink-soft); border: 1px solid var(--line-strong);
+    border-radius: 999px; padding: 6px 13px; }
+  .tag-list a:hover { border-color: var(--accent); color: var(--accent); }
+  .author-bio { display: grid; grid-template-columns: 72px 1fr; gap: 20px; align-items: start; padding: 26px;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); margin: 2em 0; }
+  .author-bio .avatar { width: 72px; height: 72px; font-size: 26px; }
+  .author-bio .b-name { font-family: var(--sans); font-weight: 700; font-size: 17px; color: var(--ink); }
+  .author-bio .b-role { font-family: var(--sans); font-size: 13px; color: var(--ink-muted); margin: 3px 0 11px; }
+  .author-bio .b-text { font-family: var(--serif); font-size: 15px; line-height: 1.58; color: var(--ink-soft); }
+  .author-bio .b-links { display: flex; gap: 14px; margin-top: 13px; }
+  .author-bio .b-links a { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--accent); }
+  .related { border-top: 1px solid var(--line); padding-top: 32px; margin-top: 14px; }
+  .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .rel-card { cursor: pointer; padding-top: 16px; border-top: 2px solid var(--ink); }
+  .rel-card h4 { font-family: var(--serif); font-weight: 700; font-size: 18px; line-height: 1.3; margin: 10px 0 8px; color: var(--ink); text-wrap: balance; }
+  .rel-card:hover h4 { color: var(--accent); }
+  .rel-card .m { font-family: var(--sans); font-size: 12px; color: var(--ink-muted); }
+  @media (max-width: 720px) { .related-grid { grid-template-columns: 1fr; gap: 24px; } }
+  .article-body-wrap { padding-bottom: 22px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+</style>
+
+<div class="mock-chrome">
+  <span class="mc-label">Макет сайта · 1screen.ru</span>
+  <span class="mc-note">домен 1screen.ru · палитра «Петроль» · текстовый контент без картинок</span>
+  <div class="mock-switch" role="tablist" aria-label="Выбор макета">
+    <button role="tab" aria-selected="true" data-view="home">🏠 Главная</button>
+    <button role="tab" aria-selected="false" data-view="article">📄 Материал</button>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="logo" href="#" aria-label="1screen.ru — на главную">
+      <span class="wordmark"><span class="mark"><span class="one">1</span>screen</span><span class="tld">.ru</span></span>
+      <span class="tagline">Медиа о рекламе<br>и маркетинге</span>
+    </a>
+    <nav class="nav">
+      <a href="#">Новости</a><a class="has-caret" href="#">Adtech</a><a href="#">Инструменты</a><a href="#">Аналитика</a><a href="#">Мнения</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="Поиск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg></button>
+      <button class="btn-cta header-cta">Подписаться</button>
+      <button class="icon-btn burger" aria-label="Меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ================= HOME ================= -->
+<section id="view-home" class="view is-active" role="tabpanel" aria-label="Главная страница">
+
+  <div class="home-section">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-main">
+          <span class="badge eyebrow">Отчёты и исследования <span class="geo">РФ</span></span>
+          <h1 class="go-article">Реклама в геосервисах 2026: как 2ГИС, Яндекс.Карты и Avito делят локальный бюджет</h1>
+          <p class="lead">Локальная реклама перестала быть «покажи рядом» и превратилась в отдельную дисциплину со своими метриками и аукционом. Разбираем, кто на самом деле забирает бюджеты и где ещё есть незанятые ниши — с оговорками, потому что рынок раскрывает цифры неохотно.</p>
+          <div class="meta-row"><strong>Юрий Соколов</strong><span class="sep">·</span><span>3 июля 2026</span><span class="sep">·</span><span>12 мин чтения</span></div>
+        </div>
+        <aside class="hero-side">
+          <div class="side-head">Главное сейчас</div>
+          <div class="side-item go-article">
+            <span class="badge">Adtech <span class="geo">РФ</span></span>
+            <h3>Яндекс открыл нативный формат в РСЯ для всех рекламодателей</h3>
+            <span class="m"><span class="fresh">● 2 часа назад</span></span>
+          </div>
+          <div class="side-item go-article">
+            <span class="badge">Adtech <span class="geo">Азия</span></span>
+            <h3>Alibaba представила AI-генератор баннеров для продавцов Taobao</h3>
+            <span class="m">5 часов назад</span>
+          </div>
+          <div class="side-item go-article">
+            <span class="badge">Adtech <span class="geo">Мир</span></span>
+            <h3>The Trade Desk отчитался о росте выручки на 18% — CTV тянет рынок</h3>
+            <span class="m">вчера</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-section">
+    <div class="wrap">
+      <div class="cols">
+        <div>
+          <div class="sec-head"><h2>Свежее</h2><span class="rule"></span><a class="more" href="#">Все новости →</a></div>
+          <div class="feed">
+            <article class="feed-item go-article">
+              <span class="badge">Adtech <span class="geo">РФ</span></span>
+              <h3>VK Реклама открыла таргетинг по интересам в клипах</h3>
+              <p>Формат догоняет то, что у конкурентов работает пару лет. Вопрос — хватит ли объёма аудитории, чтобы аукцион не перегрелся уже на старте.</p>
+              <div class="meta-row"><span class="fresh">● сегодня, 09:40</span><span class="sep">·</span><span>2 мин</span></div>
+            </article>
+            <article class="feed-item go-article">
+              <span class="badge">Рынок и сделки <span class="geo">Мир</span></span>
+              <h3>M&amp;A: Criteo покупает retail-media платформу за $380 млн</h3>
+              <p>Ещё один сигнал, что retail media консолидируется. Что это даёт независимым площадкам — пока неочевидно.</p>
+              <div class="meta-row"><span>сегодня, 08:15</span><span class="sep">·</span><span>3 мин</span></div>
+            </article>
+            <article class="feed-item go-article">
+              <span class="badge">Adtech <span class="geo">Азия</span></span>
+              <h3>Baidu встроила рекламу в ответы AI-поиска Ernie</h3>
+              <p>Первый крупный игрок, кто монетизирует генеративную выдачу напрямую. За форматом стоит понаблюдать — к нему наверняка присмотрятся и в РФ.</p>
+              <div class="meta-row"><span>вчера, 19:02</span><span class="sep">·</span><span>4 мин</span></div>
+            </article>
+            <article class="feed-item go-article">
+              <span class="badge">Инструменты</span>
+              <h3>Обзор: 5 инструментов сквозной аналитики для медиабаинга в 2026</h3>
+              <p>Сравнили по цене, поддержке источников и удобству отчётов. Универсального победителя нет — выбор зависит от того, где у вас основной трафик.</p>
+              <div class="meta-row"><span>вчера, 14:20</span><span class="sep">·</span><span>9 мин</span></div>
+            </article>
+            <article class="feed-item go-article">
+              <span class="badge">Adtech <span class="geo">РФ</span></span>
+              <h3>Ozon Реклама: новые форматы в поиске и карточках товара</h3>
+              <p>Маркетплейс продолжает наращивать рекламный инвентарь. Для продавцов это и возможность, и рост ставки за видимость.</p>
+              <div class="meta-row"><span>2 июля</span><span class="sep">·</span><span>3 мин</span></div>
+            </article>
+            <article class="feed-item go-article">
+              <span class="badge">Adtech <span class="geo">Мир</span></span>
+              <h3>Meta раскрыла долю AI-креативов в Advantage+ — 40% кампаний</h3>
+              <p>Цифра от самой Meta, так что к ней стоит относиться с поправкой. Но направление понятно: ручную сборку креативов теснит генерация.</p>
+              <div class="meta-row"><span>2 июля</span><span class="sep">·</span><span>5 мин</span></div>
+            </article>
+          </div>
+        </div>
+
+        <aside class="rail">
+          <div class="rail-mod rail-digest">
+            <div class="rail-title">Дайджест недели</div>
+            <a class="d-head go-article" href="#">Retail media обгоняет соцсети, а Google снова откладывает отказ от cookie</a>
+            <ul class="digest-list">
+              <li>Retail-media бюджеты в РФ впервые обошли долю соцсетей</li>
+              <li>Google в третий раз сдвинул сроки по third-party cookie</li>
+              <li>2ГИС расширил рекламные форматы в навигации</li>
+              <li>Amazon Ads запустил DSP для брендов без магазина</li>
+            </ul>
+          </div>
+          <div class="rail-mod">
+            <div class="rail-title">Популярное за неделю</div>
+            <ol class="pop-list">
+              <li class="pop-item go-article"><h4>Как устроен аукцион в Яндекс Директе — на пальцах</h4></li>
+              <li class="pop-item go-article"><h4>Retail media в РФ: кто выигрывает гонку за бюджеты</h4></li>
+              <li class="pop-item go-article"><h4>Что не так с атрибуцией в 2026 году</h4></li>
+              <li class="pop-item go-article"><h4>Обзор: 5 инструментов сквозной аналитики</h4></li>
+              <li class="pop-item go-article"><h4>Геореклама: разбор форматов 2ГИС</h4></li>
+            </ol>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-section alt">
+    <div class="wrap">
+      <div class="sec-head"><h2>Мнения</h2><span class="rule"></span><a class="more" href="#">Все колонки →</a></div>
+      <div class="opinions">
+        <article class="op-card go-article">
+          <span class="badge">Колонка</span>
+          <blockquote>«Почему мы запускаем медиа про adtech в России — и чего в нём осознанно не будет»</blockquote>
+          <div class="op-author"><div class="avatar">ЮС</div><div class="who"><div class="n">Юрий Соколов</div><div class="r">Основатель, экс-2ГИС</div></div></div>
+        </article>
+        <article class="op-card go-article">
+          <span class="badge">Колонка</span>
+          <blockquote>«Геореклама выросла из „покажи рядом“ в отдельную дисциплину. Рынок это ещё не признал»</blockquote>
+          <div class="op-author"><div class="avatar">ЮС</div><div class="who"><div class="n">Юрий Соколов</div><div class="r">Основатель, экс-2ГИС</div></div></div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-section">
+    <div class="wrap">
+      <div class="newsletter">
+        <h2>Раз в неделю — то, что реально сдвинуло рынок</h2>
+        <p>Без пресс-релизов ради пресс-релизов. Дайджест по adtech и маркетингу: РФ, мир, Азия — с разбором «что это значит для рекламодателя».</p>
+        <form class="nl-form" onsubmit="return false"><input type="email" placeholder="ваш@email.ru" aria-label="Email"><button type="submit">Подписаться</button></form>
+        <div class="nl-note">Никакого спама. Отписка в один клик.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ARTICLE ================= -->
+<section id="view-article" class="view" role="tabpanel" aria-label="Страница материала">
+  <div class="article-wrap">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+      <a class="go-home" href="#">Главная</a><span class="sep">/</span><a href="#">Adtech Россия</a><span class="sep">/</span><span>Яндекс открыл нативный формат в РСЯ</span>
+    </nav>
+    <div class="article-col">
+      <header class="article-head">
+        <span class="badge">Adtech <span class="geo">РФ</span></span>
+        <h1>Яндекс открыл нативный формат в РСЯ для всех рекламодателей — что меняется для перформанс-баеров</h1>
+        <p class="article-lead">Формат, который год крутился в закрытой бете у крупных клиентов, теперь можно собрать в Директе самому. На бумаге это расширение инвентаря; на практике вопросов пока больше, чем ответов.</p>
+        <div class="article-meta">
+          <div class="avatar">ЮС</div>
+          <div class="who"><div class="n"><a href="#">Юрий Соколов</a></div><div class="r">Основатель медиа</div></div>
+          <span class="spacer"></span><span>3 июля 2026</span><span class="rt">· 4 мин</span>
+          <div class="article-actions"><button aria-label="Telegram">TG</button><button aria-label="ВКонтакте">VK</button><button aria-label="Скопировать ссылку">🔗</button></div>
+        </div>
+      </header>
+
+      <div class="article-body-wrap">
+      <div class="article-body">
+        <p>На прошлой неделе Яндекс тихо, без отдельного анонса, убрал ограничение на нативный формат в Рекламной сети. То, что последний год было доступно только через персонального менеджера, теперь можно собрать в интерфейсе Директа самостоятельно — как обычную кампанию.</p>
+        <p>Нативка в РСЯ — это объявление, которое подстраивается под вёрстку площадки: берёт её шрифты, отступы и сетку вместо того, чтобы выглядеть баннером в рамке. Идея не новая, похожие responsive-форматы крутятся у западных сетей несколько лет. Но для РСЯ это, кажется, первый раз, когда формат отдали в самообслуживание без ручного согласования.</p>
+        <h2>Что меняется для баеров</h2>
+        <p>Главное — доступ к инвентарю, который раньше был закрыт. Если верить документации Яндекса, на старте формат поддерживает около 40% площадок сети, и это в основном контентные проекты, где нативка исторически показывает CTR выше медийки.</p>
+        <p>Но есть нюанс, который стоит держать в голове: новый слот конкурирует в аукционе с вашими же кампаниями за один и тот же трафик. Не факт, что суммарный охват вырастет — возможно, вы просто перераспределите бюджет между форматами. Пока данных мало, чтобы судить уверенно.</p>
+        <div class="callout">«Пока рано говорить, что нативка вытеснит медийку в РСЯ. Скорее это ещё один слот в аукционе — и он будет конкурировать с вашими же кампаниями за один и тот же трафик».</div>
+        <div class="statblock"><div class="num">~40%</div><div class="desc">площадок РСЯ поддерживают новый формат на старте — по данным самого Яндекса, независимой проверки пока нет</div></div>
+        <h2>Как это выглядит рядом с другими форматами</h2>
+        <p>Чтобы понять место нативки, полезно сравнить её с тем, что уже есть в сети. Ниже — грубая прикидка, а не редакционный вердикт: точные цифры по перформансу появятся только после первых недель открутки.</p>
+        <div class="cmp-wrap"><table class="cmp-table">
+          <thead><tr><th>Формат</th><th>Инвентарь</th><th>Сборка</th><th>Ожидаемый CTR</th></tr></thead>
+          <tbody>
+            <tr><td>Нативный (новый)</td><td>~40% площадок</td><td>Самостоятельно</td><td>Выше среднего*</td></tr>
+            <tr><td>Медийный баннер</td><td>Вся сеть</td><td>Самостоятельно</td><td>Базовый</td></tr>
+            <tr><td>Смарт-баннер</td><td>Товарные фиды</td><td>Автоматически</td><td>Зависит от фида</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Куда смотреть на старте</h3>
+        <ul>
+          <li>Сегментируйте нативку в отдельную кампанию, чтобы не смешивать статистику с медийкой.</li>
+          <li>Следите за перекрытием аудиторий — возможен каннибализм между своими же форматами.</li>
+          <li>Не доверяйте среднему CTR из справки: считайте по своим площадкам.</li>
+        </ul>
+        <p>Если коротко: формат стоит протестировать, но без завышенных ожиданий. Открытие беты в самообслуживание — это чаще про масштабирование доходов сети, чем про новый рычаг для рекламодателя. Хотя, возможно, для отдельных ниш он окажется тем самым недооценённым слотом. Проверить это можно только деньгами.</p>
+        <div class="source-box"><span>Источник:</span><a href="#">Блог Яндекс Рекламы — «Нативные объявления в РСЯ»</a></div>
+        <div class="tag-list"><a href="#">#яндекс</a><a href="#">#рся</a><a href="#">#нативная-реклама</a><a href="#">#форматы</a><a href="#">#перформанс</a></div>
+      </div>
+      </div>
+
+      <div class="author-bio">
+        <div class="avatar">ЮС</div>
+        <div>
+          <div class="b-name">Юрий Соколов</div>
+          <div class="b-role">Основатель медиа, экс-руководитель по монетизации 2ГИС</div>
+          <div class="b-text">20+ лет в рекламе и adtech. Запускал рекламные продукты в геосервисах, занимался монетизацией и коммерческим продуктом. Пишет о том, как устроен рекламный рынок изнутри.</div>
+          <div class="b-links"><a href="#">Все материалы автора →</a><a href="#">Telegram</a><a href="#">LinkedIn</a></div>
+        </div>
+      </div>
+
+      <section class="related">
+        <div class="sec-head"><h2>Читайте также</h2><span class="rule"></span></div>
+        <div class="related-grid">
+          <article class="rel-card go-article"><span class="badge">Adtech <span class="geo">РФ</span></span><h4>VK Реклама открыла таргетинг по интересам в клипах</h4><span class="m">2 мин · сегодня</span></article>
+          <article class="rel-card go-article"><span class="badge">Инструменты</span><h4>Обзор: 5 инструментов сквозной аналитики для медиабаинга</h4><span class="m">9 мин · вчера</span></article>
+          <article class="rel-card go-article"><span class="badge">Отчёты <span class="geo">РФ</span></span><h4>Реклама в геосервисах 2026: кто делит локальный бюджет</h4><span class="m">12 мин · 3 июля</span></article>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="home-section alt" style="border-top:1px solid var(--line); margin-top: 34px;">
+    <div class="wrap">
+      <div class="newsletter">
+        <h2>Понравился разбор?</h2>
+        <p>Раз в неделю присылаем такие материалы в почту — коротко и по делу.</p>
+        <form class="nl-form" onsubmit="return false"><input type="email" placeholder="ваш@email.ru" aria-label="Email"><button type="submit">Подписаться</button></form>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="#" aria-label="1screen.ru">
+          <span class="wordmark"><span class="mark"><span class="one">1</span>screen</span><span class="tld">.ru</span></span>
+          <span class="tagline">Медиа о рекламе<br>и маркетинге</span>
+        </a>
+        <p>Профессиональное медиа о рекламе, рекламных технологиях и маркетинге для России и СНГ. Мир, РФ и Азия — с разбором, а не пересказом пресс-релизов.</p>
+        <div class="socials"><a href="#" aria-label="Telegram">TG</a><a href="#" aria-label="ВКонтакте">VK</a><a href="#" aria-label="RSS">RSS</a></div>
+      </div>
+      <div class="fcol"><h4>Разделы</h4><ul><li><a href="#">Новости</a></li><li><a href="#">Обзоры</a></li><li><a href="#">Аналитика</a></li><li><a href="#">Мнения</a></li><li><a href="#">Дайджесты</a></li></ul></div>
+      <div class="fcol"><h4>Гео</h4><ul><li><a href="#">Россия</a></li><li><a href="#">Мир</a></li><li><a href="#">Азия</a></li></ul></div>
+      <div class="fcol"><h4>Медиа</h4><ul><li><a href="#">О нас</a></li><li><a href="#">Реклама на сайте</a></li><li><a href="#">Редакция</a></li><li><a href="#">Контакты</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 1screen.ru · Медиа о рекламе и маркетинге</span><span>Сделано в России · Русский</span></div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var views = { home: document.getElementById('view-home'), article: document.getElementById('view-article') };
+    var tabs = document.querySelectorAll('.mock-switch button');
+    function show(name) {
+      Object.keys(views).forEach(function (k) { views[k].classList.toggle('is-active', k === name); });
+      tabs.forEach(function (t) { t.setAttribute('aria-selected', t.dataset.view === name ? 'true' : 'false'); });
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.view); }); });
+
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.go-article')) { e.preventDefault(); show('article'); }
+      else if (e.target.closest('.go-home')) { e.preventDefault(); show('home'); }
+    });
+  })();
+</script>
