@@ -78,7 +78,13 @@
   /* ============ HEADER ============ */
   .site-header { position: sticky; top: var(--chrome-h); z-index: 100;
     background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(1.2) blur(10px);
-    border-bottom: 1px solid var(--line); }
+    border-bottom: 1px solid var(--line); transition: box-shadow .2s; }
+  .site-header.scrolled { box-shadow: 0 8px 24px -20px rgba(16,20,27,.6); }
+
+  /* прогресс чтения (только на странице материала) */
+  .read-progress { position: fixed; top: calc(var(--chrome-h) + var(--header-h)); left: 0; height: 2px; width: 0;
+    background: var(--accent); z-index: 99; display: none; }
+  body.reading .read-progress { display: block; }
   .site-header .bar { height: var(--header-h); display: flex; align-items: center; gap: 30px; }
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo .wordmark { display: inline-flex; align-items: baseline; font-weight: 800; letter-spacing: -0.035em;
@@ -89,8 +95,10 @@
     letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3);
     padding-left: 12px; border-left: 1px solid var(--line-2); white-space: nowrap; }
   .nav { display: flex; align-items: center; gap: 26px; }
-  .nav a { font-size: 14.5px; font-weight: 550; color: var(--ink-2); padding: 6px 0; position: relative; }
-  .nav a:hover { color: var(--ink); }
+  .nav a { font-size: 14.5px; font-weight: 550; color: var(--ink-2); padding: 6px 0 8px; position: relative;
+    background: linear-gradient(var(--accent), var(--accent)) no-repeat left 100% / 0 2px;
+    transition: background-size .2s ease, color .15s; }
+  .nav a:hover { color: var(--ink); background-size: 100% 2px; }
   .nav a.has-caret::after { content: "▾"; font-size: 9px; color: var(--ink-3); margin-left: 4px; }
   .header-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
   .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
@@ -100,8 +108,9 @@
   .icon-btn svg { width: 17px; height: 17px; }
   .btn-cta { font: inherit; font-size: 13.5px; font-weight: 650; background: var(--accent);
     color: #fff; border: none; border-radius: var(--radius-sm); padding: 9px 17px; cursor: pointer;
-    transition: background .15s, transform .1s; letter-spacing: -0.01em; }
-  .btn-cta:hover { background: var(--accent-strong); }
+    transition: background .15s, transform .1s, box-shadow .15s; letter-spacing: -0.01em;
+    box-shadow: 0 1px 2px rgba(15,111,120,.28); }
+  .btn-cta:hover { background: var(--accent-strong); box-shadow: 0 4px 14px -4px rgba(15,111,120,.4); }
   .btn-cta:active { transform: translateY(1px); }
   .burger { display: none; }
   @media (max-width: 1120px) and (min-width: 901px) { .logo .tagline { display: none; } }
@@ -115,7 +124,10 @@
     color: var(--ink-3); border: 1px solid var(--line-2); border-radius: 5px; padding: 2px 6px; text-transform: none; }
   .fresh { color: var(--accent-strong); font-weight: 650; }
   .dot-live { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-    margin-right: 6px; vertical-align: middle; }
+    margin-right: 6px; vertical-align: middle; animation: live-pulse 2.4s ease-out infinite; }
+  @keyframes live-pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent); }
+    70%, 100% { box-shadow: 0 0 0 6px transparent; } }
 
   /* ============ HOME ============ */
   .section { padding: 64px 0; }
@@ -128,6 +140,10 @@
   .sec-head .rule { flex: 1; height: 1px; background: var(--line); }
   .sec-head a.more { font-size: 13.5px; font-weight: 600; color: var(--accent-strong); white-space: nowrap; }
   .sec-head a.more:hover { color: var(--accent); }
+  /* акцентный тик-маркер перед подписями секций (ритм бренд-цвета, без картинок) */
+  .sec-head h2, .hero-side .side-head, .rail-mod .rail-title { display: flex; align-items: center; gap: 9px; }
+  .sec-head h2::before, .hero-side .side-head::before, .rail-mod .rail-title::before {
+    content: ""; flex: none; width: 3px; height: 12px; border-radius: 2px; background: var(--accent); }
 
   /* hero */
   .hero-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 60px; align-items: start; }
@@ -157,19 +173,23 @@
 
   /* two-column: feed + rail */
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 64px; align-items: start; }
-  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; gap: 48px; } }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; gap: 48px; } .rail { position: static; } }
 
   .feed { display: flex; flex-direction: column; }
   .feed-item { padding: 26px 0; border-top: 1px solid var(--line); cursor: pointer; }
   .feed-item:first-child { border-top: none; padding-top: 0; }
   .feed-item h3 { font-weight: 750; font-size: 22px; line-height: 1.26; margin: 11px 0 9px;
     color: var(--ink); letter-spacing: -.025em; text-wrap: balance; }
+  .feed-item h3::after { content: "→"; display: inline-block; margin-left: .28em; color: var(--accent-strong);
+    font-weight: 600; opacity: 0; transform: translateX(-5px); transition: opacity .16s, transform .16s; }
   .feed-item:hover h3 { color: var(--accent-strong); }
+  .feed-item:hover h3::after { opacity: 1; transform: translateX(0); }
   .feed-item p { font-size: 15.5px; line-height: 1.58; color: var(--ink-2); margin: 0 0 12px; max-width: 62ch; }
   @media (max-width: 640px) { .feed-item h3 { font-size: 19px; } }
 
   /* right rail */
-  .rail { display: flex; flex-direction: column; gap: 20px; }
+  .rail { display: flex; flex-direction: column; gap: 20px;
+    position: sticky; top: calc(var(--chrome-h) + var(--header-h) + 20px); }
   .rail-mod { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 22px 24px; }
   .rail-mod .rail-title { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
     color: var(--ink-2); margin-bottom: 14px; }
@@ -319,9 +339,11 @@
   @media (max-width: 720px) { .related-grid { grid-template-columns: 1fr; gap: 14px; } }
   .article-body-wrap { padding-bottom: 24px; }
 
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 </style>
+
+<div class="read-progress" id="readbar" aria-hidden="true"></div>
 
 <div class="mock-chrome">
   <span class="mc-label">Макет · 1screen.ru</span>
@@ -591,10 +613,14 @@
   (function () {
     var views = { home: document.getElementById('view-home'), article: document.getElementById('view-article') };
     var tabs = document.querySelectorAll('.mock-switch button');
+    var header = document.querySelector('.site-header');
+    var readbar = document.getElementById('readbar');
     function show(name) {
       Object.keys(views).forEach(function (k) { views[k].classList.toggle('is-active', k === name); });
       tabs.forEach(function (t) { t.setAttribute('aria-selected', t.dataset.view === name ? 'true' : 'false'); });
+      document.body.classList.toggle('reading', name === 'article');
       window.scrollTo({ top: 0, behavior: 'auto' });
+      onScroll();
     }
     tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.view); }); });
 
@@ -602,5 +628,17 @@
       if (e.target.closest('.go-article')) { e.preventDefault(); show('article'); }
       else if (e.target.closest('.go-home')) { e.preventDefault(); show('home'); }
     });
+
+    function onScroll() {
+      var y = window.scrollY || document.documentElement.scrollTop;
+      header.classList.toggle('scrolled', y > 4);
+      if (document.body.classList.contains('reading')) {
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        readbar.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    onScroll();
   })();
 </script>
