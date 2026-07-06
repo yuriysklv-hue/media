@@ -7,7 +7,7 @@
 - Домен `1screen.ru` зарегистрирован (reg.ru), проверен — чистый.
 - Сайт `media-site/` (подпапка этого репо) на **Astro 5 + Tailwind 4 + Inter** (self-hosted).
 - Собрана и задеплоена **главная** — перенос `mockups/1screen-mockup-minimal.html` (палитра «Петроль», sans, text-only). Контент демонстрационный.
-- Деплой: Vercel, проект `media`, Root Directory `media-site`, автодеплой из `main`. Публично на `https://1screen.ru`, `www` → 308 на apex.
+- Деплой: **Timeweb Cloud** (App Platform, тип «Другой»), автосборка из `main` (команда `npm ci && npm run build`, каталог проекта `media-site`, публикация `dist`). Публично на `https://1screen.ru` (авто-SSL). **Переехали с Vercel** — тот в РФ блокируется ТСПУ/РКН. DNS в reg.ru: `A @ → 92.246.76.92`.
 - `src/styles/global.css` уже содержит **всю** дизайн-систему из макета, включая стили страницы материала (`.article-*`, `.callout`, `.statblock`, `.cmp-table`, `.source-box`, `.tag-list`, `.author-bio`, `.related`, `.read-progress`). Переносить CSS заново не нужно — только разметку.
 
 ## Цель сессии
