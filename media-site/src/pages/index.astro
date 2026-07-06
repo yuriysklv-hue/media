@@ -1,0 +1,141 @@
+---
+// Главная страница 1screen.ru. Структура и тексты перенесены из канонического
+// макета mockups/1screen-mockup-minimal.html. Контент пока демонстрационный
+// (реальные материалы придут из Content Collections в следующей итерации).
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const sideItems = [
+  { cat: 'Adtech', geo: 'РФ', title: 'Яндекс открыл нативный формат в РСЯ для всех рекламодателей', time: '2 часа назад', live: true },
+  { cat: 'Adtech', geo: 'Азия', title: 'Alibaba представила AI-генератор баннеров для продавцов Taobao', time: '5 часов назад' },
+  { cat: 'Adtech', geo: 'Мир', title: 'The Trade Desk отчитался о росте выручки на 18% — CTV тянет рынок', time: 'вчера' },
+];
+
+const feed = [
+  { cat: 'Adtech', geo: 'РФ', title: 'VK Реклама открыла таргетинг по интересам в клипах', dek: 'Формат догоняет то, что у конкурентов работает пару лет. Вопрос — хватит ли объёма аудитории, чтобы аукцион не перегрелся уже на старте.', meta: 'сегодня, 09:40', rt: '2 мин', fresh: true },
+  { cat: 'Рынок и сделки', geo: 'Мир', title: 'M&A: Criteo покупает retail-media платформу за $380 млн', dek: 'Ещё один сигнал, что retail media консолидируется. Что это даёт независимым площадкам — пока неочевидно.', meta: 'сегодня, 08:15', rt: '3 мин' },
+  { cat: 'Adtech', geo: 'Азия', title: 'Baidu встроила рекламу в ответы AI-поиска Ernie', dek: 'Первый крупный игрок, кто монетизирует генеративную выдачу напрямую. За форматом стоит понаблюдать — к нему наверняка присмотрятся и в РФ.', meta: 'вчера, 19:02', rt: '4 мин' },
+  { cat: 'Инструменты', geo: null, title: 'Обзор: 5 инструментов сквозной аналитики для медиабаинга в 2026', dek: 'Сравнили по цене, поддержке источников и удобству отчётов. Универсального победителя нет — выбор зависит от того, где у вас основной трафик.', meta: 'вчера, 14:20', rt: '9 мин' },
+  { cat: 'Adtech', geo: 'РФ', title: 'Ozon Реклама: новые форматы в поиске и карточках товара', dek: 'Маркетплейс продолжает наращивать рекламный инвентарь. Для продавцов это и возможность, и рост ставки за видимость.', meta: '2 июля', rt: '3 мин' },
+  { cat: 'Adtech', geo: 'Мир', title: 'Meta раскрыла долю AI-креативов в Advantage+ — 40% кампаний', dek: 'Цифра от самой Meta, так что к ней стоит относиться с поправкой. Но направление понятно: ручную сборку креативов теснит генерация.', meta: '2 июля', rt: '5 мин' },
+];
+
+const digest = [
+  'Retail-media бюджеты в РФ впервые обошли долю соцсетей',
+  'Google в третий раз сдвинул сроки по third-party cookie',
+  '2ГИС расширил рекламные форматы в навигации',
+  'Amazon Ads запустил DSP для брендов без магазина',
+];
+
+const popular = [
+  'Как устроен аукцион в Яндекс Директе — на пальцах',
+  'Retail media в РФ: кто выигрывает гонку за бюджеты',
+  'Что не так с атрибуцией в 2026 году',
+  'Обзор: 5 инструментов сквозной аналитики',
+  'Геореклама: разбор форматов 2ГИС',
+];
+
+const opinions = [
+  '«Почему мы запускаем медиа про adtech в России — и чего в нём осознанно не будет»',
+  '«Гео-бюджеты растут третий год подряд, а нанимать под них отдельного человека рынок всё ещё не готов»',
+];
+---
+
+<BaseLayout>
+  <!-- HERO -->
+  <div class="section">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-main">
+          <span class="badge eyebrow">Отчёты и исследования <span class="geo">РФ</span></span>
+          <h1>Реклама в геосервисах 2026: как 2ГИС, Яндекс.Карты и Avito делят локальный бюджет</h1>
+          <p class="lead">У локальной рекламы теперь свой аукцион, свои метрики и свои подрядчики — «показать рядом» давно переросло в отдельную статью бюджета. Разбираем, кто забирает эти деньги и где ещё остались незанятые ниши. Цифры рынок раскрывает неохотно, так что часть выводов — с оговорками.</p>
+          <div class="meta-row"><strong>Юрий Соколов</strong><span class="sep">·</span><span class="mono">3 июля 2026</span><span class="sep">·</span><span class="mono">12 мин</span></div>
+        </div>
+        <aside class="hero-side">
+          <div class="side-head">Главное сейчас</div>
+          {sideItems.map((item) => (
+            <div class="side-item">
+              <span class="badge">{item.cat} {item.geo && <span class="geo">{item.geo}</span>}</span>
+              <h3>{item.title}</h3>
+              <span class="m">{item.live && <span class="dot-live"></span>}{item.time}</span>
+            </div>
+          ))}
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЛЕНТА + САЙД-БАР -->
+  <div class="section">
+    <div class="wrap">
+      <div class="cols">
+        <div>
+          <div class="sec-head"><h2>Свежее</h2><span class="rule"></span><a class="more" href="#">Все новости →</a></div>
+          <div class="feed">
+            {feed.map((item) => (
+              <article class="feed-item">
+                <span class="badge">{item.cat} {item.geo && <span class="geo">{item.geo}</span>}</span>
+                <h3 set:html={item.title}></h3>
+                <p>{item.dek}</p>
+                <div class="meta-row">
+                  <span class={item.fresh ? 'fresh mono' : 'mono'}>{item.fresh ? '● ' : ''}{item.meta}</span>
+                  <span class="sep">·</span><span class="mono">{item.rt}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <aside class="rail">
+          <div class="rail-mod rail-digest">
+            <div class="rail-title">Дайджест недели</div>
+            <a class="d-head" href="#">Retail media обгоняет соцсети, а Google снова откладывает отказ от cookie</a>
+            <ul class="digest-list">
+              {digest.map((d) => <li>{d}</li>)}
+            </ul>
+          </div>
+          <div class="rail-mod">
+            <div class="rail-title">Популярное за неделю</div>
+            <ol class="pop-list">
+              {popular.map((p) => <li class="pop-item"><h4>{p}</h4></li>)}
+            </ol>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- МНЕНИЯ -->
+  <div class="section subtle">
+    <div class="wrap">
+      <div class="sec-head"><h2>Мнения</h2><span class="rule"></span><a class="more" href="#">Все колонки →</a></div>
+      <div class="opinions">
+        {opinions.map((quote) => (
+          <article class="op-card">
+            <span class="badge">Колонка</span>
+            <blockquote>{quote}</blockquote>
+            <div class="op-author">
+              <div class="avatar">ЮС</div>
+              <div class="who"><div class="n">Юрий Соколов</div><div class="r">Основатель, экс-2ГИС</div></div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- ПОДПИСКА -->
+  <div class="section">
+    <div class="wrap">
+      <div class="newsletter">
+        <h2>Раз в неделю — то, что реально сдвинуло рынок</h2>
+        <p>Отбираем то, что за неделю действительно повлияло на рынок: РФ, мир, Азия. К каждому пункту — короткий разбор, что он значит для рекламодателя.</p>
+        <form class="nl-form" onsubmit="return false">
+          <input type="email" placeholder="ваш@email.ru" aria-label="Email" />
+          <button type="submit">Подписаться</button>
+        </form>
+        <div class="nl-note">Никакого спама. Отписка в один клик.</div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
