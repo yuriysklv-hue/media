@@ -1,0 +1,47 @@
+---
+// Многоколоночный футер: бренд + дескриптор + соцсети, Разделы, Гео, Медиа.
+const cols = [
+  {
+    title: 'Разделы',
+    links: ['Новости', 'Обзоры', 'Аналитика', 'Мнения', 'Дайджесты'],
+  },
+  {
+    title: 'Гео',
+    links: ['Россия', 'Мир', 'Азия'],
+  },
+  {
+    title: 'Медиа',
+    links: ['О нас', 'Реклама на сайте', 'Редакция', 'Контакты'],
+  },
+];
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="/" aria-label="1screen.ru">
+          <span class="wordmark"><span class="one">1</span>screen<span class="tld">.ru</span></span>
+          <span class="tagline">Медиа о рекламе<br />и маркетинге</span>
+        </a>
+        <p>Профессиональное медиа о рекламе, рекламных технологиях и маркетинге для России и СНГ. РФ, мир, Азия — с разбором того, что стоит за новостью и кому это важно.</p>
+        <div class="socials">
+          <a href="#" aria-label="Telegram">TG</a>
+          <a href="#" aria-label="ВКонтакте">VK</a>
+          <a href="#" aria-label="RSS">RSS</a>
+        </div>
+      </div>
+      {cols.map((col) => (
+        <div class="fcol">
+          <h4>{col.title}</h4>
+          <ul>{col.links.map((l) => <li><a href="#">{l}</a></li>)}</ul>
+        </div>
+      ))}
+    </div>
+    <div class="footer-bottom">
+      <span>© {year} 1screen.ru · Медиа о рекламе и маркетинге</span>
+      <span>Сделано в России · Русский</span>
+    </div>
+  </div>
+</footer>

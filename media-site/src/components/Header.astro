@@ -1,0 +1,35 @@
+---
+// Sticky-шапка: логотип-локап (вордмарк + дескриптор), навигация,
+// иконка поиска, CTA «Подписаться», бургер на мобайле.
+// Тень появляется при скролле (скрипт внизу BaseLayout).
+const nav = [
+  { label: 'Новости', href: '#' },
+  { label: 'Adtech', href: '#', caret: true },
+  { label: 'Инструменты', href: '#' },
+  { label: 'Аналитика', href: '#' },
+  { label: 'Мнения', href: '#' },
+];
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="logo" href="/" aria-label="1screen.ru — на главную">
+      <span class="wordmark"><span class="one">1</span>screen<span class="tld">.ru</span></span>
+      <span class="tagline">Медиа о рекламе<br />и маркетинге</span>
+    </a>
+    <nav class="nav">
+      {nav.map((item) => (
+        <a class={item.caret ? 'has-caret' : undefined} href={item.href}>{item.label}</a>
+      ))}
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="Поиск">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      </button>
+      <button class="btn-cta header-cta">Подписаться</button>
+      <button class="icon-btn burger" aria-label="Меню">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
