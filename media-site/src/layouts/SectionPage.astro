@@ -1,0 +1,37 @@
+---
+// Страница рубрики: заголовок секции + лента материалов коллекции по дате.
+import { getCollection } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import ArticleListItem from '../components/ArticleListItem.astro';
+import { SECTIONS, type ArticleCollection } from '../lib/sections';
+
+interface Props {
+  collection: ArticleCollection;
+}
+
+const { collection } = Astro.props;
+const section = SECTIONS[collection];
+const entries = (await getCollection(collection)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+---
+
+<BaseLayout title={`${section.label} — 1screen.ru`} description={section.description}>
+  <div class="section">
+    <div class="wrap">
+      <div class="sec-head"><h2>{section.label}</h2><span class="rule"></span></div>
+      <div class="cols">
+        <div class="feed">
+          {entries.map((entry) => <ArticleListItem entry={entry} />)}
+          {entries.length === 0 && <p class="empty">В этой рубрике пока пусто — материалы скоро появятся.</p>}
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* лента рубрики — одна колонка в ширину основной колонки главной */
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .empty { color: var(--ink-2); font-size: 15.5px; }
+</style>

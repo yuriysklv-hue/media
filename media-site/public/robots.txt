@@ -1,0 +1,39 @@
+# 1screen.ru — политика по ботам: см. репо media, 06_SEO_GEO_и_AI-разметка.md (раздел 5 и 8)
+
+User-agent: *
+Allow: /
+Disallow: /*?utm_
+Disallow: /*?preview=
+
+# Sitemap
+Sitemap: https://1screen.ru/sitemap-index.xml
+
+# === AI-боты — пускаем (хотим быть процитированными в ответах) ===
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: YandexGPTBot
+Allow: /
+
+# Боты-скрейперы без benefit — блокируем при выявлении (см. лог)
+# User-agent: Bytespider
+# Disallow: /

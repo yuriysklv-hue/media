@@ -1,0 +1,21 @@
+---
+// Сравнительная таблица: обёртка с горизонтальным скроллом.
+// В слот кладётся обычная markdown/HTML-таблица — класс вешается на обёртку,
+// саму таблицу стилизует .cmp-table (см. global.css).
+---
+
+<div class="cmp-wrap">
+  <slot />
+</div>
+
+<style>
+  /* markdown-таблица внутри обёртки получает вид .cmp-table без класса в контенте */
+  .cmp-wrap :global(table) { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .cmp-wrap :global(th), .cmp-wrap :global(td) { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  .cmp-wrap :global(thead th) { background: var(--bg-subtle); font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--ink-3); font-weight: 700; }
+  .cmp-wrap :global(tbody tr:last-child td) { border-bottom: none; }
+  .cmp-wrap :global(td) { color: var(--ink-2); }
+  .cmp-wrap :global(td:first-child) { color: var(--ink); font-weight: 600; }
+  .cmp-wrap :global(tbody tr:hover td) { background: var(--bg-subtle); }
+</style>

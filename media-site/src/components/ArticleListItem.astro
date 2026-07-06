@@ -1,0 +1,33 @@
+---
+// Элемент ленты (разметка .feed-item с главной): бейдж, заголовок со стрелкой,
+// лид, мета. Используется в ленте «Свежее» и на страницах рубрик.
+import type { CollectionEntry } from 'astro:content';
+import { formatFeedDate, formatReadingTime } from '../lib/format';
+import { formatGeo, type ArticleCollection } from '../lib/sections';
+
+interface Props {
+  entry: CollectionEntry<ArticleCollection>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const now = new Date();
+// «Свежая» метка — материалам сегодняшнего дня.
+const fresh = data.pubDate.toDateString() === now.toDateString();
+const readingTime = formatReadingTime(data.readingTime);
+---
+
+<article class="feed-item">
+  <span class="badge">{data.category} {data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+  <h3><a href={`/article/${entry.id}/`}>{data.title}</a></h3>
+  <p>{data.description}</p>
+  <div class="meta-row">
+    <span class={fresh ? 'fresh mono' : 'mono'}>{fresh ? '● ' : ''}{formatFeedDate(data.pubDate, now)}</span>
+    {readingTime && <><span class="sep">·</span><span class="mono">{readingTime}</span></>}
+  </div>
+</article>
+
+<style>
+  /* ссылка занимает весь заголовок; hover-состояния уже описаны в global.css */
+  .feed-item h3 a { color: inherit; }
+</style>
