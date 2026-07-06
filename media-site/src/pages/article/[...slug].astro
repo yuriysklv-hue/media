@@ -50,16 +50,28 @@ const jsonLd = {
   '@type': 'NewsArticle',
   headline: data.title,
   description: data.description,
+  image: [new URL('/og-default.png', Astro.site).href],
   datePublished: isoDate(data.pubDate),
   dateModified: isoDate(data.pubDate),
   inLanguage: 'ru',
+  isAccessibleForFree: true,
+  articleSection: data.category,
+  ...(data.tags.length > 0 ? { keywords: data.tags.join(', ') } : {}),
   mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
   ...(author ? { author: { '@type': 'Person', name: author.data.name } } : {}),
-  publisher: {
-    '@type': 'Organization',
-    name: '1screen.ru',
-    url: 'https://1screen.ru',
-  },
+  // Организация описана @graph'ом в BaseLayout — здесь только ссылка по @id.
+  publisher: { '@id': 'https://1screen.ru/#organization' },
+  speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.article-lead'] },
+};
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: section.label, item: new URL(section.path, Astro.site).href },
+    { '@type': 'ListItem', position: 3, name: data.title, item: canonical },
+  ],
 };
 
 const shareText = data.title;
@@ -69,7 +81,10 @@ const readingTime = formatReadingTime(data.readingTime);
 <BaseLayout title={`${data.title} — 1screen.ru`} description={data.description} ogType="article" reading>
   <Fragment slot="head">
     <meta property="article:published_time" content={isoDate(data.pubDate)} />
+    <meta property="article:section" content={data.category} />
+    {data.tags.map((tag) => <meta property="article:tag" content={tag} />)}
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
   </Fragment>
 
   <div class="article-wrap">

@@ -13,15 +13,22 @@
 - **Контент**: 13 демонстрационных материалов + профиль автора `authors/y-sokolov.md`. Даты форматируются по Москве (`src/lib/format.ts`), справочник рубрик — `src/lib/sections.ts`.
 - Известные мелочи: список `.article-body ul` требовал явного `list-style` (Tailwind preflight) — уже починено; в минифицированном CSS `list-style:disc` выглядит как `list-style:outside` — это норма.
 
-## Цель сессии (Итерация 3, адаптированная — деплой и дизайн уже есть)
+## Уже закрыто из Итерации 3 (сессия 06.07.2026, вечер)
+
+SEO/AI-добивка по ТЗ 06 сделана целиком:
+- `/llms.txt` и `/llms-full.txt` — динамические эндпоинты (`src/pages/llms*.txt.ts`), генерируются из коллекций при сборке;
+- RSS `/rss.xml` (`@astrojs/rss@^4`, 30 свежих) + `<link rel="alternate">` в head;
+- JSON-LD: граф `NewsMediaOrganization`+`WebSite` на всех страницах (BaseLayout), `BreadcrumbList` на материалах и рубриках, `CollectionPage` на рубриках; `NewsArticle` расширен (image, articleSection, keywords, isAccessibleForFree, speakable по `.article-lead`, publisher по `@id`);
+- OG: `og:image`/`twitter:image` → `/og-default.png` (1200×630, сгенерирована Playwright-скриншотом, стиль вордмарка), `article:section`/`article:tag`;
+- `meta robots` (`max-snippet:-1` и т.д.), самоссылающийся hreflang (`ru` + `x-default`);
+- `robots.txt`: + `ChatGPT-User`, `CCBot` Allow; `Diffbot`, `ImagesiftBot` Disallow;
+- `logo.png` 512×512 для schema.org.
+
+Осталось из ТЗ 06 (вне кода, делает владелец): Яндекс.Вебмастер + Google Search Console (добавить сайт, отправить sitemap), Метрика/Plausible. В коде: `sameAs` в Organization и `twitter:site` — когда появятся соцканалы; SearchAction — когда будет страница поиска.
+
+## Цель сессии (Итерация 3, адаптированная — деплой, дизайн и SEO уже есть)
 
 Приоритет 1 — **контент**: помочь заменить демо-материалы реальными по `CONTENT_TODO.md` (проверка фактов, реальные источники, правка фронт-маттера). Если контент делает владелец руками — идти по технической части:
-
-### 1. AI-доступность и SEO-добивка (ТЗ 06)
-- `public/llms.txt` (+ по желанию `llms-full.txt`) — раздел 7 ТЗ 06;
-- JSON-LD `BreadcrumbList` в шаблон материала (сейчас только `NewsArticle`);
-- RSS-фид (`@astrojs/rss`) — на него уже указывает иконка RSS в футере;
-- og-image: хотя бы статичная заглушка с вордмарком (сейчас `twitter:card=summary_large_image` без картинки).
 
 ### 2. Служебные страницы
 - `/about` («О нас») — текст согласовать с владельцем;

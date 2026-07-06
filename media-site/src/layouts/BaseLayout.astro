@@ -21,8 +21,41 @@ const {
   reading = false,
 } = Astro.props;
 
-// Абсолютный canonical/og:url на базе astro.config `site`.
+// Абсолютные canonical/og:url/og:image на базе astro.config `site`.
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og-default.png', Astro.site).href;
+
+// Организация + сайт (schema.org, ТЗ 06 раздел 3.1) — на всех страницах.
+// potentialAction/SearchAction добавим, когда появится страница поиска;
+// sameAs — когда заведём соцканалы (TG/VK).
+const siteLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'NewsMediaOrganization',
+      '@id': 'https://1screen.ru/#organization',
+      name: '1screen.ru',
+      url: 'https://1screen.ru/',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://1screen.ru/logo.png',
+        width: 512,
+        height: 512,
+      },
+      foundingDate: '2026-07',
+      areaServed: ['RU', 'KZ', 'BY'],
+      knowsLanguage: 'ru',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://1screen.ru/#website',
+      url: 'https://1screen.ru/',
+      name: '1screen.ru — медиа о рекламе и маркетинге',
+      inLanguage: 'ru',
+      publisher: { '@id': 'https://1screen.ru/#organization' },
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -32,7 +65,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="ru" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title="1screen.ru — медиа о рекламе и маркетинге" href="/rss.xml" />
 
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />
@@ -41,17 +78,22 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
     <meta name="theme-color" content="#14636b" />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26' font-family='system-ui' font-weight='800' fill='%230f6f78'%3E1%3C/text%3E%3C/svg%3E"
     />
+    <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
     <slot name="head" />
   </head>
   <body class:list={{ reading }}>
