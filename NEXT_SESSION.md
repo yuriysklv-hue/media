@@ -1,51 +1,55 @@
-# Задача на следующую сессию — `media-site`, Итерация 2
+# Задача на следующую сессию — `media-site`, Итерация 3
 
-> Хендофф от сессии 06.07.2026. Полный статус — в `CLAUDE.md`, раздел «Статус запуска». Этот файл — конкретная задача на следующий заход.
+> Хендофф от сессии 06.07.2026 (вечер). Полный статус — в `CLAUDE.md`, раздел «Статус запуска». Итерация 2 закрыта целиком; список демо-контента на замену — в `CONTENT_TODO.md`.
 
-## Контекст (что уже сделано)
+## Контекст (что уже сделано в Итерации 2)
 
-- Домен `1screen.ru` зарегистрирован (reg.ru), проверен — чистый.
-- Сайт `media-site/` (подпапка этого репо) на **Astro 5 + Tailwind 4 + Inter** (self-hosted).
-- Собрана и задеплоена **главная** — перенос `mockups/1screen-mockup-minimal.html` (палитра «Петроль», sans, text-only). Контент демонстрационный.
-- Деплой: **Timeweb Cloud** (App Platform, тип «Другой»), автосборка из `main` (команда `npm ci && npm run build`, каталог проекта `media-site`, публикация `dist`). Публично на `https://1screen.ru` (авто-SSL). **Переехали с Vercel** — тот в РФ блокируется ТСПУ/РКН. DNS в reg.ru: `A @ → 92.246.76.92`.
-- `src/styles/global.css` уже содержит **всю** дизайн-систему из макета, включая стили страницы материала (`.article-*`, `.callout`, `.statblock`, `.cmp-table`, `.source-box`, `.tag-list`, `.author-bio`, `.related`, `.read-progress`). Переносить CSS заново не нужно — только разметку.
+- **Content Collections** (`src/content.config.ts`, Astro 5 glob-loader): `news`, `digest`, `reviews`, `columns`, `reports` (общая zod-схема: title, description ≤160, pubDate, category, geo[], tags[], author-reference, featured, source, readingTime, highlights) + `authors`.
+- **Страница материала** `pages/article/[...slug].astro` — единый маршрут `/article/<slug>/` для всех пяти коллекций. Перенос из минимал-макета: крошки → eyebrow → H1 → лид → мета с автором и рабочим шарингом (TG/VK/копировать) → тело → source-box и теги из фронт-маттера → карточка автора → «Читайте также» → подписка. Прогресс-бар чтения работает (проп `reading` у BaseLayout).
+- **MDX-компоненты** (`src/components/article/`): `Callout`, `StatBlock`, `CmpTable` (markdown-таблица внутри, стили через `:global`). Передаются в `<Content components={...}>` — импорты в mdx-файлах не нужны.
+- **Ленты рубрик**: `/news`, `/digest`, `/reviews`, `/columns`, `/reports` (общий `layouts/SectionPage.astro` + `components/ArticleListItem.astro`). Навигация шапки и «Разделы» футера провязаны.
+- **SEO**: `@astrojs/sitemap` (`sitemap-index.xml`), `public/robots.txt` (AI-боты allowed по ТЗ 06), JSON-LD `NewsArticle` + `og:type=article` на материалах.
+- **Главная полностью динамическая**: hero = свежий `featured`, «Главное сейчас» = 3 новости (live-точка <3 ч), «Свежее» = 6 (news+reviews), дайджест из `highlights`, «Популярное» = 5 свежих (статистики пока нет), «Мнения» = 2 колонки.
+- **Контент**: 13 демонстрационных материалов + профиль автора `authors/y-sokolov.md`. Даты форматируются по Москве (`src/lib/format.ts`), справочник рубрик — `src/lib/sections.ts`.
+- Известные мелочи: список `.article-body ul` требовал явного `list-style` (Tailwind preflight) — уже починено; в минифицированном CSS `list-style:disc` выглядит как `list-style:outside` — это норма.
 
-## Цель сессии
+## Уже закрыто из Итерации 3 (сессия 06.07.2026, вечер)
 
-Контент-модель + вторая ключевая страница (материал) + SEO-каркас. Ориентиры: `09_Итерация_1_каркас_сайта.md`, `08_Итерации_разработки.md`, `06_SEO_GEO_и_AI-разметка.md` — **но канон дизайна = минимал-макет и `CLAUDE.md`**, не газетный вариант.
+SEO/AI-добивка по ТЗ 06 сделана целиком:
+- `/llms.txt` и `/llms-full.txt` — динамические эндпоинты (`src/pages/llms*.txt.ts`), генерируются из коллекций при сборке;
+- RSS `/rss.xml` (`@astrojs/rss@^4`, 30 свежих) + `<link rel="alternate">` в head;
+- JSON-LD: граф `NewsMediaOrganization`+`WebSite` на всех страницах (BaseLayout), `BreadcrumbList` на материалах и рубриках, `CollectionPage` на рубриках; `NewsArticle` расширен (image, articleSection, keywords, isAccessibleForFree, speakable по `.article-lead`, publisher по `@id`);
+- OG: `og:image`/`twitter:image` → `/og-default.png` (1200×630, сгенерирована Playwright-скриншотом, стиль вордмарка), `article:section`/`article:tag`;
+- `meta robots` (`max-snippet:-1` и т.д.), самоссылающийся hreflang (`ru` + `x-default`);
+- `robots.txt`: + `ChatGPT-User`, `CCBot` Allow; `Diffbot`, `ImagesiftBot` Disallow;
+- `logo.png` 512×512 для schema.org.
 
-### 1. Content Collections — `src/content/config.ts`
-Коллекции: `news`, `digest`, `reviews`, `columns`, `reports`, `authors`.
-Фронт-маттер материалов: `title`, `description` (≤160), `pubDate`, `type`, `category`, `geo[]` (`РФ`/`МИР`/`АЗИЯ`), `tags[]`, `author?`, `featured` (bool), `cover?`, `source?`. Категории — **без цветокодировки** (только навигация).
+Осталось из ТЗ 06 (вне кода, делает владелец): Яндекс.Вебмастер + Google Search Console (добавить сайт, отправить sitemap), Метрика/Plausible. В коде: `sameAs` в Organization и `twitter:site` — когда появятся соцканалы; SearchAction — когда будет страница поиска.
 
-### 2. Страница материала — `src/pages/article/[...slug].astro`
-Перенос секции `#view-article` из минимал-макета (в макете разметка уже собрана). Структура: хлебные крошки → eyebrow (категория + гео) → H1 → лид → мета с автором и кнопками шаринга → тело (колонка `--measure` = 680px) → `AuthorBio` → «Читайте также» (`RelatedList`, 3 карточки) → подписка. Сверху — прогресс-бар чтения (`.read-progress`, `body.reading`; логика в макете, строки ~613–643).
-Спец-блоки тела оформить как **MDX-компоненты**: `Callout`, `StatBlock`, сравнительная таблица (`.cmp-wrap`/`.cmp-table` в `overflow-x:auto`), `SourceBox`, `TagList`. Стили — уже в `global.css`.
+## Цель сессии (Итерация 3, адаптированная — деплой, дизайн и SEO уже есть)
 
-### 3. Тестовый контент (3 файла)
-- `src/content/columns/zachem-my-zapuskaem-media-pro-adtech.md` — колонка основателя;
-- `src/content/news/yandex-native-rsya-2026.md` — новость (текст из макета годится);
-- `src/content/authors/y-sokolov.md` — профиль (name, role, bio, соцссылки).
+Приоритет 1 — **контент**: помочь заменить демо-материалы реальными по `CONTENT_TODO.md` (проверка фактов, реальные источники, правка фронт-маттера). Если контент делает владелец руками — идти по технической части:
 
-### 4. Ленты рубрик
-`pages/news/index.astro` и аналоги для `/digest`, `/reviews`, `/columns`, `/reports` — списки `ArticleListItem` по типу коллекции.
+### 2. Служебные страницы
+- `/about` («О нас») — текст согласовать с владельцем;
+- страница автора `/authors/y-sokolov` (ссылка «Все материалы автора →» сейчас `#`);
+- решить судьбу пунктов футера «Реклама на сайте», «Редакция», «Контакты» (сделать или временно убрать).
 
-### 5. SEO-каркас
-`@astrojs/sitemap` (site уже `https://1screen.ru` в `astro.config.mjs`), `public/robots.txt`, schema.org `NewsArticle` (JSON-LD) в шаблоне материала. Ориентир — `06_SEO_GEO_и_AI-разметка.md`.
-
-### 6. Оживить главную
-Заменить демо-массивы в `index.astro` на данные из коллекций (`getCollection`), сортировка по `pubDate`.
+### 3. Качество
+- Lighthouse (astro preview + playwright/lighthouse) — цель ≥90 Performance;
+- проверить фронт на реальном объёме контента (когда появятся длинные статьи);
+- гео-ленты `/geo/rf|world|asia` — по желанию, футер «Гео» пока `#`.
 
 ## Подводные камни
 
-- **Канон — `mockups/1screen-mockup-minimal.html`**, НЕ `site-mockup.html` (направление сменено 05.07.2026). Шрифт — **Inter**, не Source Serif (ТЗ 09 писался под старый газетный макет — игнорировать в пользу минимала).
-- Всё в подпапке `media-site/`. Проверка: `cd media-site && npm run build`. `dig` недоступен; Playwright глобально в `/opt/node22/lib/node_modules` (import через default export: `const { chromium } = pkg`).
-- MDX — поставить `@astrojs/mdx`, если используем компоненты в теле статьи.
+- Канон дизайна — `mockups/1screen-mockup-minimal.html` и CLAUDE.md (НЕ ТЗ 02/09: там serif и старая палитра).
+- Всё в `media-site/`; сборка `cd media-site && npm run build`. Рабочая ветка сессии ≠ `main`: деплой случится только после мержа PR в `main` (делает владелец).
+- Playwright — глобально: `import pkg from '/opt/node22/lib/node_modules/playwright/index.js'; const { chromium } = pkg;`.
+- `@astrojs/mdx` держать на `^4` (7.x требует Astro 7).
+- Даты контента: `pubDate` указывать с `+03:00`; хелперы формата уже считают всё по Europe/Moscow.
 
 ## Критерий приёмки
 
-- `npm run build` без ошибок, ноль console-ошибок;
-- страница материала визуально совпадает с макетом (спец-блоки, прогресс-бар, светлая/тёмная тема);
-- тестовые `.md` проходят схему коллекций;
-- генерируются `sitemap.xml` и `robots.txt`; в материале валидный JSON-LD `NewsArticle`;
-- главная показывает реальные материалы из коллекций.
+- Build чистый, ноль console-ошибок;
+- llms.txt / RSS / BreadcrumbList на месте (если делалась техчасть);
+- реальные материалы проходят схему коллекций и корректно выглядят на главной, в рубриках и на странице материала.

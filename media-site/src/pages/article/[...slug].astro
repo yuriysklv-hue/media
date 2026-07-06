@@ -1,0 +1,210 @@
+---
+// Страница материала. Разметка — перенос секции #view-article из канонического
+// макета mockups/1screen-mockup-minimal.html. Работает для всех пяти контентных
+// коллекций; спец-блоки тела (Callout, StatBlock, CmpTable) — MDX-компоненты.
+import { getCollection, getEntry, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Callout from '../../components/article/Callout.astro';
+import StatBlock from '../../components/article/StatBlock.astro';
+import CmpTable from '../../components/article/CmpTable.astro';
+import { ARTICLE_COLLECTIONS, SECTIONS, formatGeo, type ArticleCollection } from '../../lib/sections';
+import { formatDate, formatReadingTime, isoDate } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const collection of ARTICLE_COLLECTIONS) {
+    const entries = await getCollection(collection);
+    for (const entry of entries) {
+      paths.push({ params: { slug: entry.id }, props: { entry, collection } });
+    }
+  }
+  return paths;
+}
+
+interface Props {
+  entry: CollectionEntry<ArticleCollection>;
+  collection: ArticleCollection;
+}
+
+const { entry, collection } = Astro.props;
+const { data } = entry;
+const section = SECTIONS[collection];
+const { Content } = await render(entry);
+const author = data.author ? await getEntry(data.author) : null;
+
+// «Читайте также»: свежее из той же коллекции; добираем новостями, если мало.
+const sameCollection = (await getCollection(collection)).filter((e) => e.id !== entry.id);
+let related = sameCollection.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()).slice(0, 3);
+if (related.length < 3 && collection !== 'news') {
+  const fill = (await getCollection('news'))
+    .filter((e) => e.id !== entry.id && !related.some((r) => r.id === e.id))
+    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+    .slice(0, 3 - related.length);
+  related = [...related, ...fill];
+}
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: data.title,
+  description: data.description,
+  image: [new URL('/og-default.png', Astro.site).href],
+  datePublished: isoDate(data.pubDate),
+  dateModified: isoDate(data.pubDate),
+  inLanguage: 'ru',
+  isAccessibleForFree: true,
+  articleSection: data.category,
+  ...(data.tags.length > 0 ? { keywords: data.tags.join(', ') } : {}),
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  ...(author ? { author: { '@type': 'Person', name: author.data.name } } : {}),
+  // Организация описана @graph'ом в BaseLayout — здесь только ссылка по @id.
+  publisher: { '@id': 'https://1screen.ru/#organization' },
+  speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.article-lead'] },
+};
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: section.label, item: new URL(section.path, Astro.site).href },
+    { '@type': 'ListItem', position: 3, name: data.title, item: canonical },
+  ],
+};
+
+const shareText = data.title;
+const readingTime = formatReadingTime(data.readingTime);
+---
+
+<BaseLayout title={`${data.title} — 1screen.ru`} description={data.description} ogType="article" reading>
+  <Fragment slot="head">
+    <meta property="article:published_time" content={isoDate(data.pubDate)} />
+    <meta property="article:section" content={data.category} />
+    {data.tags.map((tag) => <meta property="article:tag" content={tag} />)}
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
+  </Fragment>
+
+  <div class="article-wrap">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+      <a href="/">Главная</a><span class="sep">/</span>
+      <a href={section.path}>{section.label}</a><span class="sep">/</span>
+      <span>{data.title}</span>
+    </nav>
+    <div class="article-col">
+      <header class="article-head">
+        <span class="badge">{data.category} {data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+        <h1>{data.title}</h1>
+        <p class="article-lead">{data.description}</p>
+        <div class="article-meta">
+          {author && (
+            <>
+              <div class="avatar">{author.data.initials}</div>
+              <div class="who">
+                <div class="n"><a href="#">{author.data.name}</a></div>
+                <div class="r">{author.data.role}</div>
+              </div>
+            </>
+          )}
+          <span class="spacer"></span>
+          <time class="mono" datetime={isoDate(data.pubDate)}>{formatDate(data.pubDate)}</time>
+          {readingTime && <span class="rt">· {readingTime}</span>}
+          <div class="article-actions">
+            <button type="button" data-share="tg" aria-label="Поделиться в Telegram">TG</button>
+            <button type="button" data-share="vk" aria-label="Поделиться во ВКонтакте">VK</button>
+            <button type="button" data-share="copy" aria-label="Скопировать ссылку">↗</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="article-body-wrap">
+        <div class="article-body">
+          <Content components={{ Callout, StatBlock, CmpTable }} />
+          {data.source && (
+            <div class="source-box">
+              <span>Источник:</span>
+              <a href={data.source.url} rel="noopener external" target="_blank">{data.source.title}</a>
+            </div>
+          )}
+          {data.tags.length > 0 && (
+            <div class="tag-list">
+              {data.tags.map((tag) => <a href="#">#{tag}</a>)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {author && (
+        <div class="author-bio">
+          <div class="avatar">{author.data.initials}</div>
+          <div>
+            <div class="b-name">{author.data.name}</div>
+            <div class="b-role">{author.data.role}</div>
+            <div class="b-text">{author.data.bio}</div>
+            <div class="b-links">
+              <a href="#">Все материалы автора →</a>
+              {author.data.links?.telegram && <a href={author.data.links.telegram}>Telegram</a>}
+              {author.data.links?.linkedin && <a href={author.data.links.linkedin}>LinkedIn</a>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {related.length > 0 && (
+        <section class="related">
+          <div class="sec-head"><h2>Читайте также</h2><span class="rule"></span></div>
+          <div class="related-grid">
+            {related.map((rel) => (
+              <a class="rel-card" href={`/article/${rel.id}/`}>
+                <span class="badge">{rel.data.category} {rel.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+                <h4>{rel.data.title}</h4>
+                <span class="m">
+                  {formatReadingTime(rel.data.readingTime)}
+                  {rel.data.readingTime ? ' · ' : ''}{formatDate(rel.data.pubDate)}
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  </div>
+
+  <div class="section subtle" style="border-top:1px solid var(--line); margin-top: 40px;">
+    <div class="wrap">
+      <div class="newsletter">
+        <h2>Понравился разбор?</h2>
+        <p>Раз в неделю присылаем такие материалы в почту — коротко и по делу.</p>
+        <form class="nl-form" onsubmit="return false">
+          <input type="email" placeholder="ваш@email.ru" aria-label="Email" />
+          <button type="submit">Подписаться</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Кнопки шаринга: TG/VK — попап, ↗ — копирование ссылки в буфер.
+    const url = window.location.href;
+    const title = document.title;
+    document.querySelectorAll<HTMLButtonElement>('.article-actions [data-share]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const kind = btn.dataset.share;
+        if (kind === 'tg') {
+          window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank', 'noopener');
+        } else if (kind === 'vk') {
+          window.open(`https://vk.com/share.php?url=${encodeURIComponent(url)}`, '_blank', 'noopener');
+        } else if (kind === 'copy') {
+          try {
+            await navigator.clipboard.writeText(url);
+            const prev = btn.textContent;
+            btn.textContent = '✓';
+            setTimeout(() => { btn.textContent = prev; }, 1500);
+          } catch { /* буфер недоступен (http/старый браузер) — молча пропускаем */ }
+        }
+      });
+    });
+  </script>
+</BaseLayout>

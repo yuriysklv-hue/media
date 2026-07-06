@@ -1,0 +1,10 @@
+---
+// Крупная цифра с пояснением (продуктовая текстура: mono-цифра + подпись).
+interface Props {
+  num: string;
+  desc: string;
+}
+const { num, desc } = Astro.props;
+---
+
+<div class="statblock"><div class="num">{num}</div><div class="desc">{desc}</div></div>

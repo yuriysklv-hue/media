@@ -1,0 +1,54 @@
+# 1screen.ru — политика по ботам: см. репо media, 06_SEO_GEO_и_AI-разметка.md (разделы 5 и 7.4)
+# Для LLM-читалок: /llms.txt и /llms-full.txt
+
+User-agent: *
+Allow: /
+Disallow: /*?utm_
+Disallow: /*?preview=
+
+# Sitemap
+Sitemap: https://1screen.ru/sitemap-index.xml
+
+# === AI-боты — пускаем тех, кто ссылается обратно на источник ===
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: YandexGPTBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# === Чистые экстракторы без обратной пользы — блокируем ===
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+# Bytespider — режим Monitor: блокируем при выявлении злоупотреблений (см. лог)
+# User-agent: Bytespider
+# Disallow: /

@@ -1,5 +1,7 @@
 ---
 // Базовый макет: <head> с SEO-метой, самохостовый шрифт Inter, шапка + слот + футер.
+// Через слот `head` страницы добавляют свою разметку в <head> (JSON-LD и т.п.).
+// Проп `reading` включает режим чтения: класс на <body> + прогресс-бар материала.
 import '@fontsource-variable/inter';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
@@ -8,15 +10,52 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title?: string;
   description?: string;
+  ogType?: 'website' | 'article';
+  reading?: boolean;
 }
 
 const {
   title = '1screen.ru — медиа о рекламе и маркетинге',
   description = 'Профессиональное медиа о рекламе, рекламных технологиях и маркетинге для России и СНГ. Новости, обзоры и аналитика: РФ, мир, Азия.',
+  ogType = 'website',
+  reading = false,
 } = Astro.props;
 
-// Абсолютный canonical/og:url на базе astro.config `site`.
+// Абсолютные canonical/og:url/og:image на базе astro.config `site`.
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og-default.png', Astro.site).href;
+
+// Организация + сайт (schema.org, ТЗ 06 раздел 3.1) — на всех страницах.
+// potentialAction/SearchAction добавим, когда появится страница поиска;
+// sameAs — когда заведём соцканалы (TG/VK).
+const siteLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'NewsMediaOrganization',
+      '@id': 'https://1screen.ru/#organization',
+      name: '1screen.ru',
+      url: 'https://1screen.ru/',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://1screen.ru/logo.png',
+        width: 512,
+        height: 512,
+      },
+      foundingDate: '2026-07',
+      areaServed: ['RU', 'KZ', 'BY'],
+      knowsLanguage: 'ru',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://1screen.ru/#website',
+      url: 'https://1screen.ru/',
+      name: '1screen.ru — медиа о рекламе и маркетинге',
+      inLanguage: 'ru',
+      publisher: { '@id': 'https://1screen.ru/#organization' },
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -26,28 +65,39 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="ru" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title="1screen.ru — медиа о рекламе и маркетинге" href="/rss.xml" />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="1screen.ru" />
     <meta property="og:locale" content="ru_RU" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
     <meta name="theme-color" content="#14636b" />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26' font-family='system-ui' font-weight='800' fill='%230f6f78'%3E1%3C/text%3E%3C/svg%3E"
     />
+    <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
+    <slot name="head" />
   </head>
-  <body>
+  <body class:list={{ reading }}>
+    <div class="read-progress" id="readbar" aria-hidden="true"></div>
     <Header />
     <main>
       <slot />
@@ -55,13 +105,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <Footer />
 
     <script>
-      // Тень шапки при скролле — единственный JS на главной.
+      // Тень шапки при скролле; в режиме чтения — ещё и прогресс-бар материала.
       const header = document.querySelector('.site-header');
+      const readbar = document.getElementById('readbar');
       const onScroll = () => {
         const y = window.scrollY || document.documentElement.scrollTop;
         header?.classList.toggle('scrolled', y > 4);
+        if (readbar && document.body.classList.contains('reading')) {
+          const h = document.documentElement.scrollHeight - window.innerHeight;
+          readbar.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
+        }
       };
       window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
       onScroll();
     </script>
   </body>

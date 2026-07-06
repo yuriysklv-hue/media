@@ -3,15 +3,31 @@
 const cols = [
   {
     title: 'Разделы',
-    links: ['Новости', 'Обзоры', 'Аналитика', 'Мнения', 'Дайджесты'],
+    links: [
+      { label: 'Новости', href: '/news' },
+      { label: 'Обзоры', href: '/reviews' },
+      { label: 'Отчёты', href: '/reports' },
+      { label: 'Мнения', href: '/columns' },
+      { label: 'Дайджесты', href: '/digest' },
+    ],
   },
   {
+    // Гео-ленты и служебные страницы появятся в следующих итерациях.
     title: 'Гео',
-    links: ['Россия', 'Мир', 'Азия'],
+    links: [
+      { label: 'Россия', href: '#' },
+      { label: 'Мир', href: '#' },
+      { label: 'Азия', href: '#' },
+    ],
   },
   {
     title: 'Медиа',
-    links: ['О нас', 'Реклама на сайте', 'Редакция', 'Контакты'],
+    links: [
+      { label: 'О нас', href: '#' },
+      { label: 'Реклама на сайте', href: '#' },
+      { label: 'Редакция', href: '#' },
+      { label: 'Контакты', href: '#' },
+    ],
   },
 ];
 const year = new Date().getFullYear();
@@ -35,7 +51,7 @@ const year = new Date().getFullYear();
       {cols.map((col) => (
         <div class="fcol">
           <h4>{col.title}</h4>
-          <ul>{col.links.map((l) => <li><a href="#">{l}</a></li>)}</ul>
+          <ul>{col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
         </div>
       ))}
     </div>
