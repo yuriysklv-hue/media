@@ -3,6 +3,7 @@
 // лид, мета. Используется в ленте «Свежее» и на страницах рубрик.
 import type { CollectionEntry } from 'astro:content';
 import { formatFeedDate, formatReadingTime } from '../lib/format';
+import { formatCategory } from '../lib/categories';
 import { formatGeo, type ArticleCollection } from '../lib/sections';
 
 interface Props {
@@ -18,7 +19,7 @@ const readingTime = formatReadingTime(data.readingTime);
 ---
 
 <article class="feed-item">
-  <span class="badge">{data.category} {data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+  <span class="badge">{formatCategory(data.category)} {data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
   <h3><a href={`/article/${entry.id}/`}>{data.title}</a></h3>
   <p>{data.description}</p>
   <div class="meta-row">

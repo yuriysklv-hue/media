@@ -2,7 +2,7 @@
 title: "Meta раскрыла долю AI-креативов в Advantage+ — 40% кампаний"
 description: "Цифра от самой Meta, так что к ней стоит относиться с поправкой. Но направление понятно: ручную сборку креативов теснит генерация."
 pubDate: 2026-07-02T10:00:00+03:00
-category: "Adtech"
+category: "adtech-world"
 geo: ["МИР"]
 tags: ["meta", "advantage-plus", "ai-креативы", "автоматизация"]
 author: y-sokolov

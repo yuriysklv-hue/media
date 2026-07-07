@@ -2,7 +2,7 @@
 title: "Alibaba представила AI-генератор баннеров для продавцов Taobao"
 description: "Инструмент собирает креативы из карточки товара за секунды. Для мелких продавцов это экономия на дизайне; вопрос качества выдачи пока открыт."
 pubDate: 2026-07-06T08:40:00+03:00
-category: "Adtech"
+category: "adtech-asia"
 geo: ["АЗИЯ"]
 tags: ["alibaba", "taobao", "ai-креативы", "ecommerce"]
 author: y-sokolov

@@ -6,6 +6,7 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleListItem from '../components/ArticleListItem.astro';
 import { ARTICLE_COLLECTIONS, formatGeo, type ArticleCollection } from '../lib/sections';
+import { formatCategory } from '../lib/categories';
 import { formatDate, formatReadingTime, formatRelative } from '../lib/format';
 
 type Entry = CollectionEntry<ArticleCollection>;
@@ -54,7 +55,7 @@ const isLive = (d: Date) => now.getTime() - d.getTime() < 3 * 3_600_000;
       <div class="wrap">
         <div class="hero-grid">
           <div class="hero-main">
-            <span class="badge eyebrow">{hero.data.category} {hero.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+            <span class="badge eyebrow">{formatCategory(hero.data.category)} {hero.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
             <h1><a href={`/article/${hero.id}/`}>{hero.data.title}</a></h1>
             <p class="lead">{hero.data.description}</p>
             <div class="meta-row">
@@ -67,7 +68,7 @@ const isLive = (d: Date) => now.getTime() - d.getTime() < 3 * 3_600_000;
             <div class="side-head">Главное сейчас</div>
             {sideItems.map((item) => (
               <a class="side-item" href={`/article/${item.id}/`}>
-                <span class="badge">{item.data.category} {item.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+                <span class="badge">{formatCategory(item.data.category)} {item.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
                 <h3>{item.data.title}</h3>
                 <span class="m">{isLive(item.data.pubDate) && <span class="dot-live"></span>}{formatRelative(item.data.pubDate, now)}</span>
               </a>
@@ -122,7 +123,7 @@ const isLive = (d: Date) => now.getTime() - d.getTime() < 3 * 3_600_000;
         <div class="opinions">
           {opinions.map(({ entry, author }) => (
             <a class="op-card" href={`/article/${entry.id}/`}>
-              <span class="badge">{entry.data.category}</span>
+              <span class="badge">{formatCategory(entry.data.category)}</span>
               <blockquote>«{entry.data.title}»</blockquote>
               {author && (
                 <div class="op-author">

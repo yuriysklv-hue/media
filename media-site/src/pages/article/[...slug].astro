@@ -9,6 +9,7 @@ import Callout from '../../components/article/Callout.astro';
 import StatBlock from '../../components/article/StatBlock.astro';
 import CmpTable from '../../components/article/CmpTable.astro';
 import { ARTICLE_COLLECTIONS, SECTIONS, formatGeo, type ArticleCollection } from '../../lib/sections';
+import { formatCategory } from '../../lib/categories';
 import { formatDate, formatReadingTime, isoDate } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -55,10 +56,10 @@ const jsonLd = {
   dateModified: isoDate(data.pubDate),
   inLanguage: 'ru',
   isAccessibleForFree: true,
-  articleSection: data.category,
+  articleSection: formatCategory(data.category),
   ...(data.tags.length > 0 ? { keywords: data.tags.join(', ') } : {}),
   mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
-  ...(author ? { author: { '@type': 'Person', name: author.data.name } } : {}),
+  ...(author ? { author: { '@type': author.data.team ? 'Organization' : 'Person', name: author.data.name } } : {}),
   // Организация описана @graph'ом в BaseLayout — здесь только ссылка по @id.
   publisher: { '@id': 'https://1screen.ru/#organization' },
   speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.article-lead'] },
@@ -81,7 +82,7 @@ const readingTime = formatReadingTime(data.readingTime);
 <BaseLayout title={`${data.title} — 1screen.ru`} description={data.description} ogType="article" reading>
   <Fragment slot="head">
     <meta property="article:published_time" content={isoDate(data.pubDate)} />
-    <meta property="article:section" content={data.category} />
+    <meta property="article:section" content={formatCategory(data.category)} />
     {data.tags.map((tag) => <meta property="article:tag" content={tag} />)}
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
@@ -95,7 +96,7 @@ const readingTime = formatReadingTime(data.readingTime);
     </nav>
     <div class="article-col">
       <header class="article-head">
-        <span class="badge">{data.category} {data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+        <span class="badge">{formatCategory(data.category)} {data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
         <h1>{data.title}</h1>
         <p class="article-lead">{data.description}</p>
         <div class="article-meta">
@@ -158,7 +159,7 @@ const readingTime = formatReadingTime(data.readingTime);
           <div class="related-grid">
             {related.map((rel) => (
               <a class="rel-card" href={`/article/${rel.id}/`}>
-                <span class="badge">{rel.data.category} {rel.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
+                <span class="badge">{formatCategory(rel.data.category)} {rel.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
                 <h4>{rel.data.title}</h4>
                 <span class="m">
                   {formatReadingTime(rel.data.readingTime)}
