@@ -24,7 +24,7 @@
 |---|---|---|
 | `media` (этот) | ТЗ-документация + макеты **+ сайт в подпапке `media-site/`** | Markdown + Astro |
 | `media-site` | Сайт — **инициализирован как подпапка `media-site/` в этом репо** (пока не отдельный репозиторий; вынести позже) | Astro + Tailwind + Content Collections → Timeweb Cloud |
-| `media-agents` (план) | Пайплайн агентов | Python (RSS → фильтр → перевод → написание → git-публикация) |
+| `media-agents` | Пайплайн агентов — **репозиторий создан** (07.07.2026), пока только ТЗ: `для_кодинга/ТЗ_Новостной_пайплайн.md` + reference-копии ТЗ 00/03/06; код — следующий этап. Публикация — PR в этот репо (`media-site/src/content/...`). В новой сессии подключать командой «добавь репозиторий media-agents» (add_repo) | Python (RSS → фильтр → перевод → написание → git-публикация) |
 
 > ⚠️ **Почему подпапка, а не отдельный репо:** сайт живёт в `media-site/` внутри `media`, потому что рабочие сессии имеют доступ только к репозиторию `media`. Vercel деплоит подпапку через настройку **Root Directory = `media-site`**. По ТЗ сайт со временем выносится в отдельный репозиторий — история сборки к тому моменту не понадобится.
 
@@ -93,6 +93,11 @@
 - **SEO/AI-слой (ТЗ 06 закрыт в коде):** `sitemap-index.xml`; `robots.txt` (LLM-боты Allow, Diffbot/ImagesiftBot Disallow); **`/llms.txt` + `/llms-full.txt`** (динамические, из коллекций); **RSS `/rss.xml`**; JSON-LD-граф `NewsMediaOrganization`+`WebSite` на всех страницах, `NewsArticle` (+speakable/keywords/articleSection) и `BreadcrumbList` на материалах, `CollectionPage`+`BreadcrumbList` на рубриках; og:image `/og-default.png` 1200×630 + `logo.png` 512 (сгенерированы Playwright'ом); meta robots, hreflang. Вне кода (владелец): Вебмастер/GSC/Метрика.
 - **Контент:** 13 демо-материалов + автор `y-sokolov`. **Всё демо — план замены на реальные в `CONTENT_TODO.md`** (3–4 дня).
 - Хелперы: `src/lib/format.ts` (даты по Europe/Moscow — на сборке TZ=UTC, иначе время врёт), `src/lib/sections.ts` (справочник рубрик). Tailwind preflight сбрасывает `list-style` — для `.article-body` задан явно.
+
+**Контракт с `media-agents` (сделано 07.07.2026):** сайт принимает контент агентского пайплайна как есть.
+- **Категории — машинные слаги** из `config/vocabulary.yaml` агентов: `adtech-ru | adtech-world | adtech-asia | market-news | tools | creative` + сайтовый `editorial` (только для ручных материалов). В схеме — `z.enum`, подписи для бейджей/RSS/schema.org — в `src/lib/categories.ts` (`formatCategory`); все три adtech-слага показываются как «Adtech» — гео различает тег РФ/Мир/Азия. Демо-контент переведён на слаги.
+- **Авторы-службы** в `src/content/authors/`: `news-world` («Служба новостей Мир»), `news-ru`, `news-asia`. У авторов новое поле `team: true` — в JSON-LD такой автор размечается `Organization`, а не `Person`.
+- **Поля контракта в схеме статьи** (snake_case, как в ТЗ пайплайна): `social_title` (≤100, генерирует Enricher), `sources_count` и `week` (`YYYY-Wnn`, для digest).
 
 **Деплой (Timeweb Cloud, App Platform).** Тип приложения **«Другой»** (Node.js 24), автосборка из GitHub-репо `yuriysklv-hue/media`, ветка `main`. Настройки сборки: команда `npm ci && npm run build`, «Путь до директории проекта» = `media-site`, «Директория сборки» = `dist`, поле «Зависимости» (системные apt-пакеты) — **пусто** (npm уже в образе Node). Автодеплой при пуше в `main`. Публичный сайт `https://1screen.ru` (авто-SSL Let's Encrypt от Timeweb). Тех-адрес приложения: `*.twc1.net`.
 

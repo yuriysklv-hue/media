@@ -3,6 +3,7 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
 import { getAllArticles } from '../lib/content';
+import { formatCategory } from '../lib/categories';
 import { SECTIONS } from '../lib/sections';
 
 export async function GET(context: APIContext) {
@@ -17,7 +18,7 @@ export async function GET(context: APIContext) {
       description: entry.data.description,
       pubDate: entry.data.pubDate,
       link: `/article/${entry.id}/`,
-      categories: [SECTIONS[entry.collection].label, entry.data.category],
+      categories: [SECTIONS[entry.collection].label, formatCategory(entry.data.category)],
     })),
     customData: '<language>ru</language>',
   });

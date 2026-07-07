@@ -2,7 +2,7 @@
 title: "M&A: Criteo покупает retail-media платформу за $380 млн"
 description: "Ещё один сигнал, что retail media консолидируется. Что это даёт независимым площадкам — пока неочевидно."
 pubDate: 2026-07-06T08:15:00+03:00
-category: "Рынок и сделки"
+category: "market-news"
 geo: ["МИР"]
 tags: ["criteo", "retail-media", "m-and-a", "сделки"]
 author: y-sokolov

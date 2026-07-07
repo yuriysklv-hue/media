@@ -4,13 +4,15 @@
 // и во фронт-маттере не дублируется.
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { CATEGORY_SLUGS } from './lib/categories';
 
 const articleSchema = z.object({
   title: z.string(),
   // Лид/описание: идёт в <meta name="description"> и в карточки лент.
   description: z.string().max(160),
   pubDate: z.coerce.date(),
-  category: z.string(),
+  // Машинный слаг из справочника src/lib/categories.ts (контракт с media-agents).
+  category: z.enum(CATEGORY_SLUGS),
   geo: z.array(z.enum(['РФ', 'МИР', 'АЗИЯ'])).default([]),
   tags: z.array(z.string()).default([]),
   author: reference('authors').optional(),
@@ -22,6 +24,16 @@ const articleSchema = z.object({
   readingTime: z.number().int().positive().optional(),
   // Короткие пункты для сайд-бара «Дайджест недели» (используется коллекцией digest).
   highlights: z.array(z.string()).optional(),
+  // Поля контракта с media-agents (имена — snake_case, как в ТЗ пайплайна).
+  // Заголовок для анонсов в соцсетях; генерирует Enricher.
+  social_title: z.string().max(100).optional(),
+  // Количество источников недели (digest); пишет Digest Writer.
+  sources_count: z.number().int().positive().optional(),
+  // ISO-неделя дайджеста вида «2026-W28» (digest).
+  week: z
+    .string()
+    .regex(/^\d{4}-W\d{2}$/)
+    .optional(),
 });
 
 const makeArticleCollection = (dir: string) =>
@@ -38,6 +50,9 @@ const authors = defineCollection({
     bio: z.string(),
     // Инициалы для аватара-кружка (картинок не используем).
     initials: z.string().max(3),
+    // Редакционная служба (news-world и т.п.), а не человек:
+    // в JSON-LD такой автор размечается как Organization.
+    team: z.boolean().default(false),
     links: z
       .object({
         telegram: z.string().url().optional(),

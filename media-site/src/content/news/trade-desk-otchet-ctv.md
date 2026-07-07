@@ -2,7 +2,7 @@
 title: "The Trade Desk отчитался о росте выручки на 18% — CTV тянет рынок"
 description: "Квартальный отчёт крупнейшей независимой DSP: рост держится на подключённом ТВ и retail media. Открытый веб продолжает терять долю."
 pubDate: 2026-07-05T12:00:00+03:00
-category: "Adtech"
+category: "adtech-world"
 geo: ["МИР"]
 tags: ["the-trade-desk", "ctv", "programmatic", "отчётность"]
 author: y-sokolov
