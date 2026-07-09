@@ -6,7 +6,7 @@
 
 ## Материалы (осталось 5 демо)
 
-> ⚠️ **08.07.2026 (сессия обратной связи):** 8 демо-**новостей** удалены с сайта — новостную ленту теперь наполняют только реальные материалы агентов (9 шт.). Удалены: `yandex-native-rsya-2026`, `vk-reklama-targeting-klipy`, `criteo-pokupaet-retail-media-platformu`, `baidu-reklama-v-ai-poiske-ernie`, `alibaba-ai-banner-taobao`, `trade-desk-otchet-ctv`, `ozon-reklama-novye-formaty`, `meta-dolya-ai-kreativov-advantage`. Демо-hero (отчёт), колонки и дайджест **оставлены плейсхолдерами**, чтобы главная не разваливалась до появления реальных обзоров/колонок/дайджеста.
+> ⚠️ **09.07.2026 (сессия обратной связи):** 8 демо-**новостей** удалены с сайта — новостную ленту теперь наполняют только реальные материалы агентов (9 шт.). Удалены: `yandex-native-rsya-2026`, `vk-reklama-targeting-klipy`, `criteo-pokupaet-retail-media-platformu`, `baidu-reklama-v-ai-poiske-ernie`, `alibaba-ai-banner-taobao`, `trade-desk-otchet-ctv`, `ozon-reklama-novye-formaty`, `meta-dolya-ai-kreativov-advantage`. Демо-hero (отчёт), колонки и дайджест **оставлены плейсхолдерами**, чтобы главная не разваливалась до появления реальных обзоров/колонок/дайджеста.
 
 | Файл | Тема демо | Что нужно |
 |---|---|---|
