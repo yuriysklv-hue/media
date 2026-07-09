@@ -115,7 +115,7 @@ const readingTime = formatReadingTime(data.readingTime);
           <div class="article-actions">
             <button type="button" data-share="tg" aria-label="Поделиться в Telegram">TG</button>
             <button type="button" data-share="vk" aria-label="Поделиться во ВКонтакте">VK</button>
-            <button type="button" data-share="copy" aria-label="Скопировать ссылку">↗</button>
+            <button type="button" data-share="copy" title="Скопировать ссылку на материал" aria-label="Скопировать ссылку">Ссылка</button>
           </div>
         </div>
       </header>
@@ -145,7 +145,7 @@ const readingTime = formatReadingTime(data.readingTime);
             <div class="b-role">{author.data.role}</div>
             <div class="b-text">{author.data.bio}</div>
             <div class="b-links">
-              <a href="#">Все материалы автора →</a>
+              <a href={`/authors/${author.id}/`}>Все материалы автора →</a>
               {author.data.links?.telegram && <a href={author.data.links.telegram}>Telegram</a>}
               {author.data.links?.linkedin && <a href={author.data.links.linkedin}>LinkedIn</a>}
             </div>
@@ -187,7 +187,7 @@ const readingTime = formatReadingTime(data.readingTime);
   </div>
 
   <script>
-    // Кнопки шаринга: TG/VK — попап, ↗ — копирование ссылки в буфер.
+    // Кнопки шаринга: TG/VK — попап, «Ссылка» — копирование ссылки в буфер.
     const url = window.location.href;
     const title = document.title;
     document.querySelectorAll<HTMLButtonElement>('.article-actions [data-share]').forEach((btn) => {

@@ -1,0 +1,130 @@
+---
+// Страница автора: карточка (био/роль/ссылки) + все материалы автора по всем
+// коллекциям. Для team-авторов (редакционных служб) в JSON-LD — Organization,
+// для людей — Person.
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleListItem from '../../components/ArticleListItem.astro';
+import { ARTICLE_COLLECTIONS } from '../../lib/sections';
+
+export async function getStaticPaths() {
+  const authors = await getCollection('authors');
+  // Материалы всех коллекций один раз, затем раскладываем по авторам.
+  const all: CollectionEntry<'news'>[] = [];
+  for (const collection of ARTICLE_COLLECTIONS) {
+    all.push(...((await getCollection(collection)) as CollectionEntry<'news'>[]));
+  }
+  return authors.map((author) => ({
+    params: { slug: author.id },
+    props: {
+      author,
+      entries: all
+        .filter((e) => e.data.author?.id === author.id)
+        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+}
+
+interface Props {
+  author: CollectionEntry<'authors'>;
+  entries: CollectionEntry<'news'>[];
+}
+
+const { author, entries } = Astro.props;
+const { data } = author;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const title = `${data.name} — 1screen.ru`;
+
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': data.team ? 'Organization' : 'Person',
+  name: data.name,
+  description: data.bio,
+  url: canonical,
+  ...(data.team ? {} : { jobTitle: data.role }),
+  ...(data.links
+    ? { sameAs: [data.links.telegram, data.links.linkedin].filter(Boolean) }
+    : {}),
+  ...(data.team ? { parentOrganization: { '@id': 'https://1screen.ru/#organization' } } : {}),
+};
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: data.name, item: canonical },
+  ],
+};
+---
+
+<BaseLayout title={title} description={data.bio}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
+  </Fragment>
+  <div class="section">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Хлебные крошки">
+        <a href="/">Главная</a> <span>/</span> <span>{data.name}</span>
+      </nav>
+
+      <div class="author-head">
+        <div class="avatar">{data.initials}</div>
+        <div>
+          <h1>{data.name}</h1>
+          <div class="a-role">{data.role}</div>
+          <p class="a-bio">{data.bio}</p>
+          {data.links && (
+            <div class="a-links">
+              {data.links.telegram && <a href={data.links.telegram}>Telegram</a>}
+              {data.links.linkedin && <a href={data.links.linkedin}>LinkedIn</a>}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div class="sec-head"><h2>Материалы автора</h2><span class="rule"></span></div>
+      <div class="cols">
+        <div class="feed">
+          {entries.map((entry) => <ArticleListItem entry={entry} />)}
+          {entries.length === 0 && (
+            <p class="empty">У автора пока нет опубликованных материалов.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .crumbs { font-size: 13px; color: var(--ink-2); margin-bottom: 22px; }
+  .crumbs a { color: var(--ink-2); }
+  .author-head {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    padding-bottom: 26px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .author-head .avatar {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .author-head h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .a-role { font-size: 14px; color: var(--ink-2); margin-bottom: 12px; }
+  .a-bio { font-size: 16px; line-height: 1.6; max-width: 640px; margin: 0 0 14px; }
+  .a-links { display: flex; gap: 16px; font-size: 14px; }
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .empty { color: var(--ink-2); font-size: 15.5px; }
+</style>
