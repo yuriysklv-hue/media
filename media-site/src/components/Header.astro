@@ -2,6 +2,7 @@
 // Sticky-шапка: логотип-локап (вордмарк + дескриптор), навигация,
 // иконка поиска, CTA «Подписаться», бургер на мобайле.
 // Тень появляется при скролле (скрипт внизу BaseLayout).
+// На <900px десктоп-навигация скрыта, бургер открывает панель .mobile-menu.
 // Пункты — реальные рубрики сайта (страницы категорий вроде «Adtech» появятся позже).
 const nav = [
   { label: 'Новости', href: '/news' },
@@ -9,6 +10,11 @@ const nav = [
   { label: 'Обзоры', href: '/reviews' },
   { label: 'Отчёты', href: '/reports' },
   { label: 'Мнения', href: '/columns' },
+];
+const geoLinks = [
+  { label: 'Россия', href: '/geo/russia' },
+  { label: 'Мир', href: '/geo/world' },
+  { label: 'Азия', href: '/geo/asia' },
 ];
 ---
 
@@ -20,7 +26,7 @@ const nav = [
     </a>
     <nav class="nav">
       {nav.map((item) => (
-        <a class={item.caret ? 'has-caret' : undefined} href={item.href}>{item.label}</a>
+        <a href={item.href}>{item.label}</a>
       ))}
     </nav>
     <div class="header-actions">
@@ -28,9 +34,64 @@ const nav = [
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
       </button>
       <button class="btn-cta header-cta">Подписаться</button>
-      <button class="icon-btn burger" aria-label="Меню">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <button
+        class="icon-btn burger"
+        aria-label="Открыть меню"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-toggle
+      >
+        <svg class="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
   </div>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <div class="wrap">
+      <nav class="mm-nav" aria-label="Мобильная навигация">
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      </nav>
+      <div class="mm-group">
+        <span class="mm-label">Гео</span>
+        <div class="mm-geo">
+          {geoLinks.map((item) => <a href={item.href}>{item.label}</a>)}
+        </div>
+      </div>
+      <div class="mm-group">
+        <a class="mm-extra" href="/about">О нас</a>
+      </div>
+      <button class="btn-cta mm-cta">Подписаться</button>
+    </div>
+  </div>
 </header>
+<div class="mobile-backdrop" data-menu-close aria-hidden="true"></div>
+
+<script>
+  // Мобильное меню: бургер открывает панель под шапкой.
+  // Закрытие — по бургеру, тапу вне (бэкдроп), клику по ссылке, Esc и при
+  // расширении окна до десктопа. Анимация уважает prefers-reduced-motion (global.css).
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.getElementById('mobile-menu');
+  const body = document.body;
+
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      body.classList.toggle('menu-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+    };
+
+    toggle.addEventListener('click', () => setOpen(!body.classList.contains('menu-open')));
+    document
+      .querySelectorAll('[data-menu-close]')
+      .forEach((el) => el.addEventListener('click', () => setOpen(false)));
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) setOpen(false);
+    });
+  }
+</script>
