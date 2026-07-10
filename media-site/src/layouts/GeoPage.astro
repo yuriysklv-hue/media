@@ -1,0 +1,74 @@
+---
+// Гео-лента: все материалы всех коллекций с заданным гео (РФ/МИР/АЗИЯ),
+// отсортированные по дате. Разметка повторяет страницу рубрики (SectionPage).
+import { getCollection } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import ArticleListItem from '../components/ArticleListItem.astro';
+import { ARTICLE_COLLECTIONS } from '../lib/sections';
+
+interface Props {
+  geo: 'РФ' | 'МИР' | 'АЗИЯ';
+  label: string;
+  path: string;
+  description: string;
+}
+
+const { geo, label, path, description } = Astro.props;
+
+const entries = (await Promise.all(ARTICLE_COLLECTIONS.map((c) => getCollection(c))))
+  .flat()
+  .filter((e) => e.data.geo.includes(geo))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: 'Гео', item: new URL('/geo', Astro.site).href },
+    { '@type': 'ListItem', position: 3, name: label, item: new URL(path, Astro.site).href },
+  ],
+};
+
+const collectionLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${label} — 1screen.ru`,
+  description,
+  url: new URL(path, Astro.site).href,
+  inLanguage: 'ru',
+  isPartOf: { '@id': 'https://1screen.ru/#website' },
+};
+---
+
+<BaseLayout title={`${label} — 1screen.ru`} description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(collectionLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
+  </Fragment>
+  <div class="section">
+    <div class="wrap">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="/">Главная</a><span class="sep">/</span>
+        <a href="/geo">Гео</a><span class="sep">/</span>
+        <span>{label}</span>
+      </nav>
+      <div class="sec-head"><h2>{label}</h2><span class="rule"></span></div>
+      <p class="geo-lead">{description}</p>
+      <div class="cols">
+        <div class="feed">
+          {entries.map((entry) => <ArticleListItem entry={entry} />)}
+          {entries.length === 0 && <p class="empty">В этом гео пока пусто — материалы скоро появятся.</p>}
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* лента гео — одна колонка, как на странице рубрики */
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .breadcrumbs { margin-bottom: 22px; }
+  .geo-lead { color: var(--ink-2); font-size: 16px; max-width: 60ch; margin: -14px 0 30px; }
+  .empty { color: var(--ink-2); font-size: 15.5px; }
+</style>

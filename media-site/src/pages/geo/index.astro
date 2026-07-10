@@ -1,0 +1,44 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+
+const geos = [
+  {
+    label: 'Россия',
+    href: '/geo/russia',
+    text: 'Российский рынок рекламы и adtech: площадки, форматы, регулирование и практика.',
+  },
+  {
+    label: 'Мир',
+    href: '/geo/world',
+    text: 'Глобальные площадки, платформы и регуляторы — и что из этого важно рынку России и СНГ.',
+  },
+  {
+    label: 'Азия',
+    href: '/geo/asia',
+    text: 'Рекламные рынки Азии: тренды и форматы региона, за которыми стоит следить.',
+  },
+];
+---
+
+<PageLayout
+  title="Гео"
+  description="Материалы 1screen.ru в разрезе географии рынка: Россия, мир и Азия — по каждому направлению отдельная лента."
+>
+  <ul class="geo-index">
+    {geos.map((g) => (
+      <li>
+        <a href={g.href}>{g.label} →</a>
+        <span>{g.text}</span>
+      </li>
+    ))}
+  </ul>
+</PageLayout>
+
+<style>
+  .geo-index { list-style: none; padding: 0; margin: 0; }
+  .geo-index li { padding: 20px 0; border-top: 1px solid var(--line); }
+  .geo-index li:first-child { border-top: none; }
+  .geo-index a { font-weight: 700; font-size: 1.15rem; color: var(--accent-strong); }
+  .geo-index a:hover { color: var(--accent); }
+  .geo-index span { display: block; margin-top: 6px; color: var(--ink-2); font-size: 16px; }
+</style>

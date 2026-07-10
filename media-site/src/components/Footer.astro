@@ -12,21 +12,21 @@ const cols = [
     ],
   },
   {
-    // Гео-ленты и служебные страницы появятся в следующих итерациях.
     title: 'Гео',
+    href: '/geo',
     links: [
-      { label: 'Россия', href: '#' },
-      { label: 'Мир', href: '#' },
-      { label: 'Азия', href: '#' },
+      { label: 'Россия', href: '/geo/russia' },
+      { label: 'Мир', href: '/geo/world' },
+      { label: 'Азия', href: '/geo/asia' },
     ],
   },
   {
     title: 'Медиа',
     links: [
-      { label: 'О нас', href: '#' },
-      { label: 'Реклама на сайте', href: '#' },
-      { label: 'Редакция', href: '#' },
-      { label: 'Контакты', href: '#' },
+      { label: 'О нас', href: '/about' },
+      { label: 'Реклама на сайте', href: '/advertising' },
+      { label: 'Редакция', href: '/editorial' },
+      { label: 'Контакты', href: '/contacts' },
     ],
   },
 ];
@@ -41,7 +41,7 @@ const year = new Date().getFullYear();
           <span class="wordmark"><span class="one">1</span>screen<span class="tld">.ru</span></span>
           <span class="tagline">Медиа о рекламе<br />и маркетинге</span>
         </a>
-        <p>Профессиональное медиа о рекламе, рекламных технологиях и маркетинге для России и СНГ. РФ, мир, Азия — с разбором того, что стоит за новостью и кому это важно.</p>
+        <p>Профессиональное медиа о рекламе, рекламных технологиях и маркетинге в Мире и России для профессионалов рынка.</p>
         <div class="socials">
           <a href="#" aria-label="Telegram">TG</a>
           <a href="#" aria-label="ВКонтакте">VK</a>
@@ -50,7 +50,7 @@ const year = new Date().getFullYear();
       </div>
       {cols.map((col) => (
         <div class="fcol">
-          <h4>{col.title}</h4>
+          <h4>{col.href ? <a href={col.href}>{col.title}</a> : col.title}</h4>
           <ul>{col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
         </div>
       ))}
