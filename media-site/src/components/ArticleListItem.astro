@@ -8,10 +8,14 @@ import { formatGeo, type ArticleCollection } from '../lib/sections';
 
 interface Props {
   entry: CollectionEntry<ArticleCollection>;
+  // Уровень заголовка карточки: 3 в ленте под секцией-h2 (главная),
+  // 2 когда лента идёт прямо под h1 страницы (рубрики, гео) — без пропусков.
+  headingLevel?: 2 | 3;
 }
 
-const { entry } = Astro.props;
+const { entry, headingLevel = 3 } = Astro.props;
 const { data } = entry;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
 const now = new Date();
 // «Свежая» метка — материалам сегодняшнего дня.
 const fresh = data.pubDate.toDateString() === now.toDateString();
@@ -20,7 +24,7 @@ const readingTime = formatReadingTime(data.readingTime);
 
 <article class="feed-item">
   <span class="badge">{formatCategory(data.category)} {data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
-  <h3><a href={`/article/${entry.id}/`}>{data.title}</a></h3>
+  <Heading><a href={`/article/${entry.id}/`}>{data.title}</a></Heading>
   <p>{data.description}</p>
   <div class="meta-row">
     <span class={fresh ? 'fresh mono' : 'mono'}>{fresh ? '● ' : ''}{formatFeedDate(data.pubDate, now)}</span>
@@ -30,5 +34,5 @@ const readingTime = formatReadingTime(data.readingTime);
 
 <style>
   /* ссылка занимает весь заголовок; hover-состояния уже описаны в global.css */
-  .feed-item h3 a { color: inherit; }
+  .feed-item :is(h2, h3) a { color: inherit; }
 </style>

@@ -50,7 +50,7 @@ const year = new Date().getFullYear();
       </div>
       {cols.map((col) => (
         <div class="fcol">
-          <h4>{col.href ? <a href={col.href}>{col.title}</a> : col.title}</h4>
+          <h2>{col.href ? <a href={col.href}>{col.title}</a> : col.title}</h2>
           <ul>{col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
         </div>
       ))}

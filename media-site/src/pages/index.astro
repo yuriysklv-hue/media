@@ -65,7 +65,7 @@ const isLive = (d: Date) => now.getTime() - d.getTime() < 3 * 3_600_000;
             </div>
           </div>
           <aside class="hero-side">
-            <div class="side-head">Главное сейчас</div>
+            <h2 class="side-head">Главное сейчас</h2>
             {sideItems.map((item) => (
               <a class="side-item" href={`/article/${item.id}/`}>
                 <span class="badge">{formatCategory(item.data.category)} {item.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
