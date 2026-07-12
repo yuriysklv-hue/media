@@ -101,7 +101,7 @@ SEO/AI-добивка по ТЗ 06 сделана целиком:
 - [x] **Google Search Console** — сайт добавлен, права подтверждены мета-тегом (`google-site-verification` в `BaseLayout`, задеплоено 11.07.2026), `sitemap-index.xml` отправлен (12.07.2026). Осталось: следить за индексацией.
 - [x] **Bing Webmaster Tools** — сайт добавлен, права подтверждены мета-тегом (`msvalidate.01` в `BaseLayout`, задеплоено 11.07.2026), `sitemap-index.xml` отправлен (12.07.2026). Важно для LLM-видимости: на индекс Bing опираются веб-поиск ChatGPT и Perplexity (см. врезку «Как SEO связано с LLM-выдачей» ниже).
 - [x] **Яндекс.Метрика** — счётчик `110606034` подключён в `BaseLayout` (`is:inline`, опции webvisor/clickmap/trackLinks/accurateTrackBounce), данные принимаются (11.07.2026). Помимо аналитики даёт Яндексу «обход по счётчику Метрики» (ускоренная индексация) + поведенческие факторы. Plausible/Umami/GA не ставим.
-- [x] **Валидация разметки после деплоя** (12.07.2026): PageSpeed Insights (моб.) — Performance 99, a11y 93, Best Practices 96, SEO 100; schema.org Validator по главной — «нет ошибок, нет предупреждений» (граф `WebSite`+`NewsMediaOrganization`). Хвост-формальность: прогнать URL материала через Rich Results Test для `NewsArticle`+`BreadcrumbList`.
+- [x] **Валидация разметки после деплоя** (12.07.2026): PageSpeed Insights (моб.) — Performance 99, a11y 93, Best Practices 96, SEO 100; schema.org Validator по главной — «нет ошибок, нет предупреждений» (граф `WebSite`+`NewsMediaOrganization`); по URL материала — `NewsArticle`, `BreadcrumbList`, `WebSite` все три без ошибок и предупреждений.
 
 **B. В коде (ждут внешних данных — сделать, когда данные появятся):**
 - [ ] `sameAs` в `NewsMediaOrganization` + `twitter:site` — когда появятся соцканалы (TG/VK).
