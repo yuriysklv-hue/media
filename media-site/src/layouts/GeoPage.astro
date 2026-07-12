@@ -53,11 +53,11 @@ const collectionLd = {
         <a href="/geo">Гео</a><span class="sep">/</span>
         <span>{label}</span>
       </nav>
-      <div class="sec-head"><h2>{label}</h2><span class="rule"></span></div>
+      <div class="sec-head"><h1>{label}</h1><span class="rule"></span></div>
       <p class="geo-lead">{description}</p>
       <div class="cols">
         <div class="feed">
-          {entries.map((entry) => <ArticleListItem entry={entry} />)}
+          {entries.map((entry) => <ArticleListItem entry={entry} headingLevel={2} />)}
           {entries.length === 0 && <p class="empty">В этом гео пока пусто — материалы скоро появятся.</p>}
         </div>
       </div>

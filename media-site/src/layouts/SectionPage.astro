@@ -42,10 +42,10 @@ const collectionLd = {
   </Fragment>
   <div class="section">
     <div class="wrap">
-      <div class="sec-head"><h2>{section.label}</h2><span class="rule"></span></div>
+      <div class="sec-head"><h1>{section.label}</h1><span class="rule"></span></div>
       <div class="cols">
         <div class="feed">
-          {entries.map((entry) => <ArticleListItem entry={entry} />)}
+          {entries.map((entry) => <ArticleListItem entry={entry} headingLevel={2} />)}
           {entries.length === 0 && <p class="empty">В этой рубрике пока пусто — материалы скоро появятся.</p>}
         </div>
       </div>

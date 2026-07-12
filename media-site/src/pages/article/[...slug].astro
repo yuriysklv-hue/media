@@ -160,7 +160,7 @@ const readingTime = formatReadingTime(data.readingTime);
             {related.map((rel) => (
               <a class="rel-card" href={`/article/${rel.id}/`}>
                 <span class="badge">{formatCategory(rel.data.category)} {rel.data.geo.map((g) => <span class="geo">{formatGeo(g)}</span>)}</span>
-                <h4>{rel.data.title}</h4>
+                <h3>{rel.data.title}</h3>
                 <span class="m">
                   {formatReadingTime(rel.data.readingTime)}
                   {rel.data.readingTime ? ' · ' : ''}{formatDate(rel.data.pubDate)}
