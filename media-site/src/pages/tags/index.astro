@@ -1,0 +1,36 @@
+---
+// Хаб тегов: облако всех тегов со счётчиком материалов, для перелинковки
+// и обхода. Ссылки ведут на /tag/<slug>/. Сам хаб индексируется.
+import { getCollection } from 'astro:content';
+import PageLayout from '../../layouts/PageLayout.astro';
+import { ARTICLE_COLLECTIONS } from '../../lib/sections';
+import { buildTagIndex } from '../../lib/tags';
+
+const entries = (await Promise.all(ARTICLE_COLLECTIONS.map((c) => getCollection(c)))).flat();
+const tags = buildTagIndex(entries);
+---
+
+<PageLayout
+  title="Теги"
+  description="Все теги 1screen.ru: сквозные темы рекламного рынка — adtech, programmatic, privacy, retail media и другие. Собраны материалы по каждой теме."
+>
+  <ul class="tag-cloud">
+    {tags.map((tag) => (
+      <li>
+        <a href={`/tag/${tag.slug}/`}>#{tag.label}<span class="c">{tag.count}</span></a>
+      </li>
+    ))}
+  </ul>
+</PageLayout>
+
+<style>
+  .tag-cloud { list-style: none; padding: 0; margin: 1.4em 0 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .tag-cloud a {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    font-family: var(--mono); font-size: 13.5px; color: var(--ink-2);
+    border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 13px;
+    text-decoration: none;
+  }
+  .tag-cloud a:hover { border-color: var(--accent); color: var(--accent-strong); }
+  .tag-cloud .c { font-size: 11.5px; color: var(--ink-3); }
+</style>

@@ -1,0 +1,93 @@
+---
+// Лента одного тега: все материалы всех коллекций с этим тегом.
+// Разметка повторяет страницу рубрики/гео. Теги с числом материалов ниже
+// TAG_INDEX_THRESHOLD отдаются под noindex,follow и не попадают в sitemap
+// (фильтр в astro.config.mjs), но страница существует — ссылки не битые.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleListItem from '../../components/ArticleListItem.astro';
+import { ARTICLE_COLLECTIONS } from '../../lib/sections';
+import { buildTagIndex } from '../../lib/tags';
+
+export async function getStaticPaths() {
+  const entries = (await Promise.all(ARTICLE_COLLECTIONS.map((c) => getCollection(c)))).flat();
+  return buildTagIndex(entries).map((tag) => ({
+    params: { slug: tag.slug },
+    props: {
+      label: tag.label,
+      count: tag.count,
+      indexable: tag.indexable,
+      entries: tag.entries.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+}
+
+const { label, count, indexable, entries } = Astro.props;
+const path = `/tag/${Astro.params.slug}/`;
+
+// Русское склонение «материал/материала/материалов» по числу.
+function materialsWord(n: number): string {
+  const mod100 = n % 100;
+  const mod10 = n % 10;
+  if (mod100 >= 11 && mod100 <= 14) return 'материалов';
+  if (mod10 === 1) return 'материал';
+  if (mod10 >= 2 && mod10 <= 4) return 'материала';
+  return 'материалов';
+}
+const title = `#${label} — материалы 1screen.ru`;
+const description = `Материалы 1screen.ru с тегом «${label}»: новости, обзоры и аналитика рекламного рынка (${count} шт.).`;
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: 'Теги', item: new URL('/tags', Astro.site).href },
+    { '@type': 'ListItem', position: 3, name: `#${label}`, item: new URL(path, Astro.site).href },
+  ],
+};
+
+const collectionLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `#${label} — 1screen.ru`,
+  description,
+  url: new URL(path, Astro.site).href,
+  inLanguage: 'ru',
+  isPartOf: { '@id': 'https://1screen.ru/#website' },
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  robots={indexable ? undefined : 'noindex, follow'}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(collectionLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
+  </Fragment>
+  <div class="section">
+    <div class="wrap">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="/">Главная</a><span class="sep">/</span>
+        <a href="/tags">Теги</a><span class="sep">/</span>
+        <span>#{label}</span>
+      </nav>
+      <div class="sec-head"><h1>#{label}</h1><span class="rule"></span></div>
+      <p class="tag-lead">{count} {materialsWord(count)} с этим тегом.</p>
+      <div class="cols">
+        <div class="feed">
+          {entries.map((entry) => <ArticleListItem entry={entry} headingLevel={2} />)}
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* лента тега — одна колонка, как на странице рубрики/гео */
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .breadcrumbs { margin-bottom: 22px; }
+  .tag-lead { color: var(--ink-2); font-size: 16px; margin: -14px 0 30px; }
+</style>
