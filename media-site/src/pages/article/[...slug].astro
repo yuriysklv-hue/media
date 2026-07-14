@@ -11,6 +11,7 @@ import CmpTable from '../../components/article/CmpTable.astro';
 import { ARTICLE_COLLECTIONS, SECTIONS, formatGeo, type ArticleCollection } from '../../lib/sections';
 import { formatCategory } from '../../lib/categories';
 import { formatDate, formatReadingTime, isoDate } from '../../lib/format';
+import { tagSlug } from '../../lib/tags';
 
 export async function getStaticPaths() {
   const paths = [];
@@ -131,7 +132,7 @@ const readingTime = formatReadingTime(data.readingTime);
           )}
           {data.tags.length > 0 && (
             <div class="tag-list">
-              {data.tags.map((tag) => <a href="#">#{tag}</a>)}
+              {data.tags.map((tag) => <a href={`/tag/${tagSlug(tag)}/`}>#{tag}</a>)}
             </div>
           )}
         </div>

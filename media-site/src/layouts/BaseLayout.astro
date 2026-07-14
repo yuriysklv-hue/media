@@ -12,6 +12,9 @@ interface Props {
   description?: string;
   ogType?: 'website' | 'article';
   reading?: boolean;
+  // Значение meta robots. По умолчанию индексируем; страницы-исключения
+  // (напр. теги ниже порога) передают 'noindex, follow'.
+  robots?: string;
 }
 
 const {
@@ -19,6 +22,7 @@ const {
   description = 'Профессиональное медиа о рекламе, рекламных технологиях и маркетинге для России и СНГ. Новости, обзоры и аналитика: РФ, мир, Азия.',
   ogType = 'website',
   reading = false,
+  robots = 'index, follow, max-image-preview:large, max-snippet:-1',
 } = Astro.props;
 
 // Абсолютные canonical/og:url/og:image на базе astro.config `site`.
@@ -65,7 +69,7 @@ const siteLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="robots" content={robots} />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="ru" href={canonical} />
     <link rel="alternate" hreflang="x-default" href={canonical} />
