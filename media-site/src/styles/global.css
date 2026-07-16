@@ -330,6 +330,12 @@ body.menu-open .burger .i-close { display: block; }
 .article-body li { margin-bottom: .5em; }
 .article-body li::marker { color: var(--ink-3); }
 .article-body strong { font-weight: 700; }
+/* Прямая речь спикеров: семантический <q cite> (задача 7-E, формат B).
+   Кавычки «» уже напечатаны в тексте — гасим авто-кавычки браузера, чтобы не
+   было двойных. Визуально не выделяем (канон «минимал»): ценность разметки
+   машинная (SEO/LLM-цитируемость), поток чтения не меняется. */
+.article-body q { quotes: none; }
+.article-body q::before, .article-body q::after { content: none; }
 .callout { border-left: 3px solid var(--accent); background: var(--accent-tint); padding: 22px 26px; margin: 1.9em 0;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 18px; line-height: 1.5; color: var(--ink); font-weight: 500; }
 .statblock { display: flex; align-items: baseline; gap: 22px; margin: 1.9em 0; padding: 26px;
