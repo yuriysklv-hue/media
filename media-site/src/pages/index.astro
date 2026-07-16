@@ -8,6 +8,7 @@ import ArticleListItem from '../components/ArticleListItem.astro';
 import { ARTICLE_COLLECTIONS, formatGeo, type ArticleCollection } from '../lib/sections';
 import { formatCategory } from '../lib/categories';
 import { formatDate, formatReadingTime, formatRelative } from '../lib/format';
+import { SHOW_NEWSLETTER } from '../lib/flags';
 
 type Entry = CollectionEntry<ArticleCollection>;
 const byDateDesc = (a: Entry, b: Entry) => b.data.pubDate.getTime() - a.data.pubDate.getTime();
@@ -138,7 +139,8 @@ const isLive = (d: Date) => now.getTime() - d.getTime() < 3 * 3_600_000;
     </div>
   )}
 
-  <!-- ПОДПИСКА -->
+  {/* ПОДПИСКА — скрыта до появления сервиса рассылки (src/lib/flags.ts) */}
+  {SHOW_NEWSLETTER && (
   <div class="section">
     <div class="wrap">
       <div class="newsletter">
@@ -152,6 +154,7 @@ const isLive = (d: Date) => now.getTime() - d.getTime() < 3 * 3_600_000;
       </div>
     </div>
   </div>
+  )}
 </BaseLayout>
 
 <style>

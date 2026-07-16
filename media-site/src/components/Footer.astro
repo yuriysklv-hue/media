@@ -1,5 +1,6 @@
 ---
 // Многоколоночный футер: бренд + дескриптор + соцсети, Разделы, Гео, Медиа.
+import { SHOW_SOCIALS } from '../lib/flags';
 const cols = [
   {
     title: 'Разделы',
@@ -44,9 +45,10 @@ const year = new Date().getFullYear();
         </a>
         <p>Профессиональное медиа о рекламе, рекламных технологиях и маркетинге в Мире и России для профессионалов рынка.</p>
         <div class="socials">
-          <a href="#" aria-label="Telegram">TG</a>
-          <a href="#" aria-label="ВКонтакте">VK</a>
-          <a href="#" aria-label="RSS">RSS</a>
+          {/* TG/VK скрыты до появления соцканалов — см. src/lib/flags.ts (SHOW_SOCIALS) */}
+          {SHOW_SOCIALS && <a href="#" aria-label="Telegram">TG</a>}
+          {SHOW_SOCIALS && <a href="#" aria-label="ВКонтакте">VK</a>}
+          <a href="/rss.xml" aria-label="RSS">RSS</a>
         </div>
       </div>
       {cols.map((col) => (
