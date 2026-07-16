@@ -12,6 +12,7 @@ import { ARTICLE_COLLECTIONS, SECTIONS, formatGeo, type ArticleCollection } from
 import { formatCategory } from '../../lib/categories';
 import { formatDate, formatReadingTime, isoDate } from '../../lib/format';
 import { tagSlug } from '../../lib/tags';
+import { SHOW_NEWSLETTER } from '../../lib/flags';
 
 export async function getStaticPaths() {
   const paths = [];
@@ -174,6 +175,8 @@ const readingTime = formatReadingTime(data.readingTime);
     </div>
   </div>
 
+  {/* ПОДПИСКА — скрыта до появления сервиса рассылки (src/lib/flags.ts) */}
+  {SHOW_NEWSLETTER && (
   <div class="section subtle" style="border-top:1px solid var(--line); margin-top: 40px;">
     <div class="wrap">
       <div class="newsletter">
@@ -186,6 +189,7 @@ const readingTime = formatReadingTime(data.readingTime);
       </div>
     </div>
   </div>
+  )}
 
   <script>
     // Кнопки шаринга: TG/VK — попап, «Ссылка» — копирование ссылки в буфер.

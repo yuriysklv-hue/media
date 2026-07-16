@@ -4,6 +4,8 @@
 // Тень появляется при скролле (скрипт внизу BaseLayout).
 // На <900px десктоп-навигация скрыта, бургер открывает панель .mobile-menu.
 // Пункты — реальные рубрики сайта (страницы категорий вроде «Adtech» появятся позже).
+// CTA «Подписаться» скрыт до появления сервиса рассылки — см. src/lib/flags.ts.
+import { SHOW_NEWSLETTER } from '../lib/flags';
 const nav = [
   { label: 'Новости', href: '/news' },
   { label: 'Дайджесты', href: '/digest' },
@@ -33,7 +35,7 @@ const geoLinks = [
       <button class="icon-btn" aria-label="Поиск">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
       </button>
-      <button class="btn-cta header-cta">Подписаться</button>
+      {SHOW_NEWSLETTER && <button class="btn-cta header-cta">Подписаться</button>}
       <button
         class="icon-btn burger"
         aria-label="Открыть меню"
@@ -61,7 +63,7 @@ const geoLinks = [
       <div class="mm-group">
         <a class="mm-extra" href="/about">О нас</a>
       </div>
-      <button class="btn-cta mm-cta">Подписаться</button>
+      {SHOW_NEWSLETTER && <button class="btn-cta mm-cta">Подписаться</button>}
     </div>
   </div>
 </header>
