@@ -11,6 +11,10 @@ const articleSchema = z.object({
   // Лид/описание: идёт в <meta name="description"> и в карточки лент.
   description: z.string().max(160),
   pubDate: z.coerce.date(),
+  // Момент последнего обновления материала (update-flow пайплайна). Опционально:
+  // отсутствует = материал не обновлялся. Идёт в JSON-LD dateModified (SEO —
+  // Яндекс.Новости/Google News). Само значение проставляет media-agents.
+  updatedDate: z.coerce.date().optional(),
   // Машинный слаг из справочника src/lib/categories.ts (контракт с media-agents).
   category: z.enum(CATEGORY_SLUGS),
   geo: z.array(z.enum(['РФ', 'МИР', 'АЗИЯ'])).default([]),
@@ -20,6 +24,10 @@ const articleSchema = z.object({
   // Обложка допустима только у feature-материала, сейчас не используется (канон: text-only).
   cover: z.string().optional(),
   source: z.object({ title: z.string(), url: z.string().url() }).optional(),
+  // Дополнительные источники многоисточникового материала (media-agents склеил
+  // одну новость из нескольких фидов). Опционально: отсутствует/пусто = один
+  // источник, рендерится только primary `source`, как раньше.
+  additional_sources: z.array(z.object({ title: z.string(), url: z.string().url() })).optional(),
   // Время чтения, минут. Пока проставляется вручную; позже — считать по тексту.
   readingTime: z.number().int().positive().optional(),
   // Короткие пункты для сайд-бара «Дайджест недели» (используется коллекцией digest).
