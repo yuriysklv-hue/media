@@ -13,12 +13,13 @@ export const SPRAV_TYPE_LABELS: Record<SpravType, string> = {
   organization: 'Организация',
 };
 
-// Заголовок группы на индексе + якорь секции (для ссылок из футера).
+// Множественная подпись типа: подпись фильтра на индексе + ссылка из футера.
+// Якорь = слаг типа (совпадает с data-type фильтра и location.hash).
 export const SPRAV_GROUPS: Record<SpravType, { title: string; anchor: string }> = {
-  company: { title: 'Компании', anchor: 'companies' },
-  technology: { title: 'Технологии', anchor: 'technologies' },
-  term: { title: 'Термины', anchor: 'terms' },
-  organization: { title: 'Организации', anchor: 'organizations' },
+  company: { title: 'Компании', anchor: 'company' },
+  technology: { title: 'Технологии', anchor: 'technology' },
+  term: { title: 'Термины', anchor: 'term' },
+  organization: { title: 'Организации', anchor: 'organization' },
 };
 
 export function formatSpravType(type: string): string {
