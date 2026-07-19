@@ -50,6 +50,78 @@ const makeArticleCollection = (dir: string) =>
     schema: articleSchema,
   });
 
+// База знаний (Spravochnik) — второй, вечнозелёный раздел. Контракт с media-agents
+// (src/spravochnik/writer.py): 4 типа материала, у каждого свой набор facts. Тип
+// материала — в поле `type` (в отличие от контентных коллекций, где тип = имя
+// коллекции). JSON-LD собирает сайт из facts+type (SpravochnikJsonLd.astro),
+// LLM его не пишет. Поля `author` тут нет — материалы без авторства-персоны.
+const spravBase = {
+  title: z.string(),
+  description: z.string().max(160),
+  // Схема НЕ строгая: backend пишет `slug` во фронт-маттер, но id/роут Astro берёт
+  // из имени файла — поле терпим как optional, лишние ключи zod отбрасывает.
+  slug: z.string().optional(),
+  pubDate: z.coerce.date(),
+  // Момент обновления (задел под update-flow) — идёт в JSON-LD dateModified.
+  updatedDate: z.coerce.date().optional(),
+  aliases: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([]),
+  // Slug'и других материалов справочника; несуществующие отбрасываются в роуте.
+  related: z.array(z.string()).default([]),
+};
+
+const spravochnik = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/spravochnik' }),
+  schema: z.discriminatedUnion('type', [
+    z.object({
+      ...spravBase,
+      type: z.literal('company'),
+      facts: z.object({
+        founded: z.union([z.number(), z.string()]),
+        founders: z.array(z.string()),
+        hq: z.string(),
+        official_url: z.string().url(),
+        subtype: z.string().optional(),
+        parent_organization: z.string().nullable().optional(),
+        ticker: z.string().optional(),
+        key_products: z.array(z.string()).default([]),
+      }),
+    }),
+    z.object({
+      ...spravBase,
+      type: z.literal('technology'),
+      facts: z.object({
+        developer: z.string(),
+        category: z.string(),
+        official_url: z.string().url(),
+        launch_date: z.union([z.number(), z.string()]).optional(),
+        pricing_model: z.string().optional(),
+        alternatives: z.array(z.string()).default([]),
+      }),
+    }),
+    z.object({
+      ...spravBase,
+      type: z.literal('term'),
+      facts: z.object({
+        category: z.string(),
+        definition: z.string(),
+        aliases: z.array(z.string()).default([]),
+      }),
+    }),
+    z.object({
+      ...spravBase,
+      type: z.literal('organization'),
+      facts: z.object({
+        full_name: z.string(),
+        founded: z.union([z.number(), z.string()]),
+        mission: z.string(),
+        official_url: z.string().url(),
+        key_initiatives: z.array(z.string()).default([]),
+      }),
+    }),
+  ]),
+});
+
 const authors = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/authors' }),
   schema: z.object({
@@ -76,5 +148,6 @@ export const collections = {
   reviews: makeArticleCollection('reviews'),
   columns: makeArticleCollection('columns'),
   reports: makeArticleCollection('reports'),
+  spravochnik,
   authors,
 };

@@ -1,0 +1,49 @@
+---
+// Виджет главной «Новые в Базе знаний»: свежие материалы справочника с бейджем
+// типа (без иконок — минимализм). Врезается в index.astro по паттерну секций.
+// Не рендерится, если материалов справочника ещё нет.
+import { getCollection } from 'astro:content';
+import { formatSpravType } from '../lib/spravochnik';
+
+const entries = (await getCollection('spravochnik'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 5);
+---
+
+{entries.length > 0 && (
+  <div class="rail-mod">
+    <div class="rail-title">Новое в Базе знаний</div>
+    <ul class="sprav-widget">
+      {entries.map((e) => (
+        <li>
+          <a href={`/spravochnik/${e.id}/`}>{e.data.title}</a>
+          <span class="badge">{formatSpravType(e.data.type)}</span>
+        </li>
+      ))}
+    </ul>
+    <a class="rail-more" href="/spravochnik/">Вся база знаний →</a>
+  </div>
+)}
+
+<style>
+  .sprav-widget { list-style: none; margin: 0; padding: 0; }
+  .sprav-widget li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .sprav-widget li:last-child { border-bottom: 0; }
+  .sprav-widget a { color: inherit; font-size: 14.5px; line-height: 1.4; }
+  .sprav-widget a:hover { color: var(--accent-strong); }
+  .sprav-widget .badge { flex: none; }
+  .rail-more {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--accent-strong);
+  }
+  .rail-more:hover { color: var(--accent); }
+</style>

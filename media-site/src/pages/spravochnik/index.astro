@@ -1,0 +1,94 @@
+---
+// Индекс Базы знаний: все материалы, сгруппированные по типу (Компании /
+// Технологии / Термины / Организации). Статический, без query-параметров —
+// краулабельно (06_SEO_GEO §8). Сортировка внутри группы по pubDate убыв.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SPRAV_TYPES, SPRAV_GROUPS, formatSpravType } from '../../lib/spravochnik';
+
+const entries = (await getCollection('spravochnik')).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+
+const groups = SPRAV_TYPES.map((type) => ({
+  type,
+  ...SPRAV_GROUPS[type],
+  items: entries.filter((e) => e.data.type === type),
+})).filter((g) => g.items.length > 0);
+
+const title = 'База знаний — 1screen.ru';
+const description =
+  'База знаний 1screen.ru: справочник по рекламным технологиям — компании, технологии, термины и организации adtech с фактами и разбором для рынка РФ и СНГ.';
+const path = '/spravochnik/';
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: 'База знаний', item: new URL(path, Astro.site).href },
+  ],
+};
+
+const collectionLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description,
+  url: new URL(path, Astro.site).href,
+  inLanguage: 'ru',
+  isPartOf: { '@id': 'https://1screen.ru/#website' },
+};
+---
+
+<BaseLayout title={title} description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(collectionLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
+  </Fragment>
+  <div class="section">
+    <div class="wrap">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="/">Главная</a><span class="sep">/</span>
+        <span>База знаний</span>
+      </nav>
+      <div class="sec-head"><h1>База знаний</h1><span class="rule"></span></div>
+      <p class="sprav-lead">Справочник по рекламным технологиям: компании, технологии, термины и организации adtech — с фактами и разбором для рынка РФ и СНГ.</p>
+
+      {groups.length === 0 && (
+        <p class="empty">Материалы скоро появятся.</p>
+      )}
+
+      {groups.map((group) => (
+        <section class="sprav-group" id={group.anchor}>
+          <div class="sec-head"><h2>{group.title}</h2><span class="rule"></span></div>
+          <ul class="sprav-list">
+            {group.items.map((e) => (
+              <li>
+                <a href={`/spravochnik/${e.id}/`}>
+                  <span class="t">{e.data.title}</span>
+                  <span class="badge">{formatSpravType(e.data.type)}</span>
+                </a>
+                <p>{e.data.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .breadcrumbs { margin-bottom: 22px; }
+  .sprav-lead { color: var(--ink-2); font-size: 16px; max-width: 62ch; margin: -14px 0 34px; }
+  .empty { color: var(--ink-2); font-size: 15.5px; }
+  .sprav-group { margin-bottom: 40px; scroll-margin-top: 90px; }
+  .sprav-list { list-style: none; margin: 0; padding: 0; }
+  .sprav-list li { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .sprav-list li:last-child { border-bottom: 0; }
+  .sprav-list a { display: inline-flex; align-items: baseline; gap: 12px; color: inherit; }
+  .sprav-list a .t { font-size: 18px; font-weight: 650; }
+  .sprav-list a:hover .t { color: var(--accent-strong); }
+  .sprav-list p { margin: 5px 0 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.5; max-width: 68ch; }
+</style>

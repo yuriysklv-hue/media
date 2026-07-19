@@ -1,0 +1,199 @@
+---
+// Страница материала Базы знаний. Единый роут /spravochnik/<slug>/ для всех 4 типов.
+// Разметка повторяет страницу материала (article/[...slug].astro): крошки, бейдж,
+// H1, лид, тело (<Content />). Плюс карточка facts по типу и блок «Связанные термины».
+// Автора у справочника нет; JSON-LD — компонент SpravochnikJsonLd.
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SpravochnikJsonLd from '../../components/SpravochnikJsonLd.astro';
+import { formatSpravType } from '../../lib/spravochnik';
+import { formatDate, isoDate } from '../../lib/format';
+import { tagSlug } from '../../lib/tags';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('spravochnik');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props {
+  entry: CollectionEntry<'spravochnik'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+// Карточка facts: список [подпись, значение] по типу. Пустые/отсутствующие — опускаем.
+type Row = [string, string];
+const rows: Row[] = [];
+const push = (label: string, value: unknown) => {
+  if (value === undefined || value === null || value === '') return;
+  const text = Array.isArray(value) ? value.filter(Boolean).join(', ') : String(value);
+  if (text) rows.push([label, text]);
+};
+
+if (data.type === 'company') {
+  const f = data.facts;
+  push('Основана', f.founded);
+  push('Основатели', f.founders);
+  push('Штаб-квартира', f.hq);
+  push('Тип', f.subtype);
+  push('Головная организация', f.parent_organization ?? undefined);
+  push('Тикер', f.ticker);
+  push('Ключевые продукты', f.key_products);
+} else if (data.type === 'technology') {
+  const f = data.facts;
+  push('Разработчик', f.developer);
+  push('Категория', f.category);
+  push('Запуск', f.launch_date);
+  push('Модель оплаты', f.pricing_model);
+  push('Альтернативы', f.alternatives);
+} else if (data.type === 'term') {
+  const f = data.facts;
+  push('Категория', f.category);
+  push('Другие названия', f.aliases);
+} else {
+  const f = data.facts;
+  push('Полное название', f.full_name);
+  push('Основана', f.founded);
+  push('Миссия', f.mission);
+  push('Ключевые инициативы', f.key_initiatives);
+}
+
+// Официальный сайт — общий для company/technology/organization (у term его нет).
+const officialUrl = 'official_url' in data.facts ? data.facts.official_url : undefined;
+
+// «Связанные термины» — только существующие slug'и (нет битых внутренних ссылок).
+const all = await getCollection('spravochnik');
+const ids = new Set(all.map((e) => e.id));
+const relatedEntries = data.related
+  .filter((s) => ids.has(s) && s !== entry.id)
+  .map((s) => all.find((e) => e.id === s)!)
+  .filter(Boolean);
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<BaseLayout title={`${data.title} — База знаний — 1screen.ru`} description={data.description} reading>
+  <Fragment slot="head">
+    <meta property="article:published_time" content={isoDate(data.pubDate)} />
+    <SpravochnikJsonLd entry={entry} />
+  </Fragment>
+
+  <div class="article-wrap">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+      <a href="/">Главная</a><span class="sep">/</span>
+      <a href="/spravochnik/">База знаний</a><span class="sep">/</span>
+      <span>{data.title}</span>
+    </nav>
+    <div class="article-col">
+      <header class="article-head">
+        <span class="badge">{formatSpravType(data.type)}</span>
+        <h1>{data.title}</h1>
+        <p class="article-lead">{data.description}</p>
+        <div class="article-meta">
+          <span class="spacer"></span>
+          <time class="mono" datetime={isoDate(data.pubDate)}>{formatDate(data.pubDate)}</time>
+        </div>
+      </header>
+
+      {rows.length > 0 && (
+        <div class="sprav-facts">
+          <dl>
+            {rows.map(([label, value]) => (
+              <div class="fact-row">
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+            {officialUrl && (
+              <div class="fact-row">
+                <dt>Сайт</dt>
+                <dd><a href={officialUrl} rel="noopener external nofollow" target="_blank">{officialUrl.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</a></dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      )}
+
+      <div class="article-body-wrap">
+        <div class="article-body">
+          <Content />
+          {data.tags.length > 0 && (
+            <div class="tag-list">
+              {data.tags.map((tag) => <a href={`/tag/${tagSlug(tag)}/`}>#{tag}</a>)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {relatedEntries.length > 0 && (
+        <section class="sprav-related">
+          <div class="sec-head"><h2>Связанные термины</h2><span class="rule"></span></div>
+          <div class="sprav-related-grid">
+            {relatedEntries.map((rel) => (
+              <a class="sprav-rel-card" href={`/spravochnik/${rel.id}/`}>
+                <span class="badge">{formatSpravType(rel.data.type)}</span>
+                <h3>{rel.data.title}</h3>
+                <span class="d">{rel.data.description}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Карточка фактов: поднятая поверхность, mono-подписи — в тон продуктовому минимализму. */
+  .sprav-facts {
+    margin: 4px 0 30px;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    max-width: 680px;
+  }
+  .sprav-facts dl { margin: 0; }
+  .fact-row {
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 8px 18px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .fact-row:last-child { border-bottom: 0; }
+  .fact-row dt {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    padding-top: 1px;
+  }
+  .fact-row dd { margin: 0; color: var(--ink); font-size: 15.5px; line-height: 1.5; }
+  .fact-row dd a { color: var(--accent-strong); text-decoration: underline; text-underline-offset: 2px; }
+  .fact-row dd a:hover { color: var(--accent); }
+  @media (max-width: 560px) {
+    .fact-row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    .fact-row dt { padding-top: 4px; }
+  }
+
+  /* «Связанные термины» — карточки в тон блока «Читайте также» на материале.
+     Классы свои (не .rel-card/.m), чтобы не наследовать mono-стиль article-страницы. */
+  .sprav-related { margin-top: 44px; }
+  .sprav-related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .sprav-rel-card {
+    display: block;
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: inherit;
+    transition: border-color 0.15s ease;
+  }
+  .sprav-rel-card:hover { border-color: var(--accent); }
+  .sprav-rel-card h3 { margin: 10px 0 6px; font-size: 17px; }
+  .sprav-rel-card .d { color: var(--ink-2); font-size: 13.5px; line-height: 1.45; display: block; }
+</style>

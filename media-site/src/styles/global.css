@@ -273,7 +273,7 @@ body.menu-open .burger .i-close { display: block; }
 
 /* footer */
 .site-footer { background: var(--bg-subtle); border-top: 1px solid var(--line); }
-.footer-grid { display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 32px; padding: 56px 0 34px; }
+.footer-grid { display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr 1fr; gap: 32px; padding: 56px 0 34px; }
 .footer-brand .logo { margin-bottom: 16px; }
 .footer-brand p { font-size: 14px; color: var(--ink-2); line-height: 1.6; max-width: 30em; margin: 0 0 18px; }
 .socials { display: flex; gap: 8px; }
