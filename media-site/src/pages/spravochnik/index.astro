@@ -1,11 +1,10 @@
 ---
 // Индекс Базы знаний — алфавитный глоссарий. Все материалы одним списком,
 // сгруппированы по первой букве названия; клик по названию ведёт на страницу
-// термина. Фильтр по типу — прогрессивное улучшение (без JS показан весь
-// список, краулабельно). Ссылки из футера (#company и т.п.) предвыбирают фильтр.
+// термина. Чистый HTML/CSS, без клиентского JS.
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { SPRAV_TYPES, SPRAV_GROUPS, formatSpravType } from '../../lib/spravochnik';
+import { formatSpravType } from '../../lib/spravochnik';
 
 // Порядок: сначала латиница (A–Z), затем кириллица (А–Я), затем прочее —
 // иначе localeCompare('ru') ставит кириллицу перед латиницей (П раньше A).
@@ -28,10 +27,6 @@ for (const e of entries) {
   if (last && last.letter === letter) last.items.push(e);
   else letterGroups.push({ letter, items: [e] });
 }
-
-const counts = Object.fromEntries(
-  SPRAV_TYPES.map((t) => [t, entries.filter((e) => e.data.type === t).length]),
-);
 
 const title = 'База знаний — 1screen.ru';
 const description =
@@ -74,98 +69,31 @@ const collectionLd = {
 
       {entries.length === 0 && <p class="empty">Материалы скоро появятся.</p>}
 
-      {entries.length > 0 && (
-        <>
-          <div class="sprav-filter" role="group" aria-label="Фильтр по типу">
-            <button type="button" class="chip is-active" data-filter="all" aria-pressed="true">Все<span class="c">{entries.length}</span></button>
-            {SPRAV_TYPES.filter((t) => counts[t] > 0).map((t) => (
-              <button type="button" class="chip" data-filter={t} aria-pressed="false">{SPRAV_GROUPS[t].title}<span class="c">{counts[t]}</span></button>
-            ))}
+      <div class="sprav-index">
+        {letterGroups.map((group) => (
+          <div class="letter-group">
+            <div class="letter" aria-hidden="true">{group.letter}</div>
+            <ul>
+              {group.items.map((e) => (
+                <li>
+                  <a href={`/spravochnik/${e.id}/`}>
+                    <span class="t">{e.data.title}</span>
+                    <span class="k">{formatSpravType(e.data.type)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
-
-          <div class="sprav-index">
-            {letterGroups.map((group) => (
-              <div class="letter-group" data-letters>
-                <div class="letter" aria-hidden="true">{group.letter}</div>
-                <ul>
-                  {group.items.map((e) => (
-                    <li data-type={e.data.type}>
-                      <a href={`/spravochnik/${e.id}/`}>
-                        <span class="t">{e.data.title}</span>
-                        <span class="k">{formatSpravType(e.data.type)}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <p class="no-match" hidden>В этом типе пока нет материалов.</p>
-        </>
-      )}
+        ))}
+      </div>
     </div>
   </div>
 </BaseLayout>
 
-<script>
-  // Прогрессивный фильтр по типу. База (без JS) — весь список. Скрипт прячет
-  // строки не выбранного типа, пустые буквенные группы и синхронит location.hash.
-  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.sprav-filter .chip'));
-  const groups = Array.from(document.querySelectorAll<HTMLElement>('.letter-group'));
-  const noMatch = document.querySelector<HTMLElement>('.no-match');
-  const rows = Array.from(document.querySelectorAll<HTMLElement>('.sprav-index li'));
-
-  const apply = (type: string) => {
-    let visible = 0;
-    rows.forEach((li) => {
-      const show = type === 'all' || li.dataset.type === type;
-      li.hidden = !show;
-      if (show) visible++;
-    });
-    // Скрываем буквенную группу, если все её строки спрятаны.
-    groups.forEach((g) => {
-      const anyVisible = Array.from(g.querySelectorAll<HTMLElement>('li')).some((li) => !li.hidden);
-      g.hidden = !anyVisible;
-    });
-    if (noMatch) noMatch.hidden = visible !== 0;
-    chips.forEach((c) => {
-      const on = c.dataset.filter === type;
-      c.classList.toggle('is-active', on);
-      c.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
-  };
-
-  const valid = new Set(chips.map((c) => c.dataset.filter));
-  chips.forEach((c) =>
-    c.addEventListener('click', () => {
-      const t = c.dataset.filter!;
-      apply(t);
-      history.replaceState(null, '', t === 'all' ? location.pathname : `#${t}`);
-    }),
-  );
-
-  // Предвыбор типа из hash (ссылки из футера: /spravochnik/#company).
-  const fromHash = location.hash.replace('#', '');
-  if (fromHash && valid.has(fromHash)) apply(fromHash);
-</script>
-
 <style>
   .breadcrumbs { margin-bottom: 22px; }
-  .sprav-lead { color: var(--ink-2); font-size: 16px; max-width: 62ch; margin: -14px 0 26px; }
+  .sprav-lead { color: var(--ink-2); font-size: 16px; max-width: 62ch; margin: -14px 0 30px; }
   .empty { color: var(--ink-2); font-size: 15.5px; }
-
-  /* Фильтр-чипы по типу */
-  .sprav-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 30px; }
-  .chip {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 6px 13px; border: 1px solid var(--line); border-radius: 999px;
-    background: transparent; color: var(--ink-2); font-size: 13.5px; cursor: pointer;
-    transition: border-color .15s ease, color .15s ease, background .15s ease;
-  }
-  .chip:hover { border-color: var(--accent); color: var(--accent-strong); }
-  .chip .c { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--ink-3); }
-  .chip.is-active { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
-  .chip.is-active .c { color: rgba(255,255,255,.75); }
 
   /* Алфавитный список */
   .letter-group { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px 16px; padding: 10px 0; border-top: 1px solid var(--line); }
@@ -189,7 +117,6 @@ const collectionLd = {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3);
   }
-  .no-match { color: var(--ink-2); font-size: 15px; }
 
   @media (max-width: 560px) {
     .letter-group { grid-template-columns: 30px minmax(0, 1fr); gap: 6px 10px; }
