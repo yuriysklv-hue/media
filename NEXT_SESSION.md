@@ -4,6 +4,17 @@
 >
 > **Последняя сессия — 14.07.2026.** Закрыты задача 7-H (страницы тегов `/tag/[slug]` + хаб `/tags`, порог индексации ≥3, sitemap-фильтр — PR смёржен) и задача 8.1 (подсветка markdown-ссылок в теле). Детали — в одноимённых блоках `CLAUDE.md`. Ранее (10.07.2026) — задачи 3 (бургер) и 4 (служебные страницы) + гео-ленты, см. блок «Уже закрыто (сессия 10.07.2026)» ниже.
 
+## 🆕 Сессия 19.07.2026: раздел «База знаний» (Spravochnik, Фаза 2) — СМЁРЖЕНО + НА САЙТЕ
+
+Реализована site-часть Базы знаний (`/spravochnik/`) по чеклисту `media-agents/для_кодинга/ТЗ_База_знаний_Фаза2_сайт.md`. **PR #58 смёржен; первый реальный материал Adobe (PR #59) живёт на сайте.** Полный разбор — в блоке «Сессия 19.07.2026 (База знаний / Spravochnik — Фаза 2)» в `CLAUDE.md`. Коротко:
+
+- Коллекция `spravochnik` (`content.config.ts`, `z.discriminatedUnion` по `type`, **без `author`**); JSON-LD в Astro из `facts`+`type` (`SpravochnikJsonLd.astro`); роуты `/spravochnik/` (алфавитный глоссарий, **без клиентского JS**) и `/spravochnik/<slug>`; виджет на главной; nav в Header/Footer; секция в `llms.txt`.
+- Материалы приходят из `media-agents` (`Spravochnik Pipeline`, cron 6 ч) draft-PR'ами → **ручной мерж** (как новости). Авто-мёржа нет.
+- **Открытые хвосты (для следующей сессии):**
+  - Раздел индексируется/растёт по мере мержа материалов из очереди (8 в очереди: Criteo, Magnite, Advantage+, Conversions API, термины/организация). Проверять каждый draft-PR перед мержем (схема строгая — битый `.md` уронит `astro build` и весь деплой).
+  - **Читайте также → новости** на странице термина сейчас НЕ рендерим (в чеклисте §4 опущено). Когда backend начнёт класть `related_news`, прокинуть в схему + `[slug].astro` — отдельная мелкая задача.
+  - Мелочь на стороне пайплайна: `facts.subtype` пришёл как «Публичная компания» вместо таксономии `platform/agency/…` — косметика, правится в `media-agents` (не на сайте).
+
 ## Контекст (что уже сделано в Итерации 2)
 
 - **Content Collections** (`src/content.config.ts`, Astro 5 glob-loader): `news`, `digest`, `reviews`, `columns`, `reports` (общая zod-схема: title, description ≤160, pubDate, category, geo[], tags[], author-reference, featured, source, readingTime, highlights) + `authors`.
