@@ -40,6 +40,20 @@ export async function GET(context: APIContext) {
     }
   }
 
+  // База знаний — весь справочник (вечнозелёный, без 90-дневного окна).
+  const sprav = (await getCollection('spravochnik')).sort((a, b) =>
+    a.data.title.localeCompare(b.data.title, 'ru'),
+  );
+  if (sprav.length > 0) {
+    lines.push('## База знаний (справочник adtech)', '');
+    for (const e of sprav) {
+      lines.push(`### ${e.data.title}`);
+      lines.push(`- URL: ${new URL(`/spravochnik/${e.id}/`, site).href}`);
+      lines.push(`- Тип: ${e.data.type}`);
+      lines.push(`- Описание: ${e.data.description}`, '');
+    }
+  }
+
   lines.push('## Авторы', '');
   for (const a of authors) {
     lines.push(`- **${a.data.name}** — ${a.data.role}. ${a.data.bio}`);

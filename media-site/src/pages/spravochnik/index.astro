@@ -1,0 +1,125 @@
+---
+// Индекс Базы знаний — алфавитный глоссарий. Все материалы одним списком,
+// сгруппированы по первой букве названия; клик по названию ведёт на страницу
+// термина. Чистый HTML/CSS, без клиентского JS.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatSpravType } from '../../lib/spravochnik';
+
+// Порядок: сначала латиница (A–Z), затем кириллица (А–Я), затем прочее —
+// иначе localeCompare('ru') ставит кириллицу перед латиницей (П раньше A).
+const scriptRank = (title: string): number => {
+  const c = title[0] ?? '';
+  if (/[a-z]/i.test(c)) return 0;
+  if (/[а-яё]/i.test(c)) return 1;
+  return 2;
+};
+const entries = (await getCollection('spravochnik')).sort((a, b) => {
+  const r = scriptRank(a.data.title) - scriptRank(b.data.title);
+  return r !== 0 ? r : a.data.title.localeCompare(b.data.title, 'ru', { sensitivity: 'base' });
+});
+
+// Группировка по первой букве названия (в порядке уже отсортированного списка).
+const letterGroups: { letter: string; items: typeof entries }[] = [];
+for (const e of entries) {
+  const letter = (e.data.title[0] ?? '#').toUpperCase();
+  const last = letterGroups[letterGroups.length - 1];
+  if (last && last.letter === letter) last.items.push(e);
+  else letterGroups.push({ letter, items: [e] });
+}
+
+const title = 'База знаний — 1screen.ru';
+const description =
+  'База знаний 1screen.ru: алфавитный справочник по рекламным технологиям — компании, технологии, термины и организации adtech для рынка РФ и СНГ.';
+const path = '/spravochnik/';
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: 'База знаний', item: new URL(path, Astro.site).href },
+  ],
+};
+
+const collectionLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description,
+  url: new URL(path, Astro.site).href,
+  inLanguage: 'ru',
+  isPartOf: { '@id': 'https://1screen.ru/#website' },
+};
+---
+
+<BaseLayout title={title} description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(collectionLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />
+  </Fragment>
+  <div class="section">
+    <div class="wrap">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="/">Главная</a><span class="sep">/</span>
+        <span>База знаний</span>
+      </nav>
+      <div class="sec-head"><h1>База знаний</h1><span class="rule"></span></div>
+      <p class="sprav-lead">Справочник по рекламным технологиям: компании, технологии, термины и организации adtech. Выберите материал из списка.</p>
+
+      {entries.length === 0 && <p class="empty">Материалы скоро появятся.</p>}
+
+      <div class="sprav-index">
+        {letterGroups.map((group) => (
+          <div class="letter-group">
+            <div class="letter" aria-hidden="true">{group.letter}</div>
+            <ul>
+              {group.items.map((e) => (
+                <li>
+                  <a href={`/spravochnik/${e.id}/`}>
+                    <span class="t">{e.data.title}</span>
+                    <span class="k">{formatSpravType(e.data.type)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .breadcrumbs { margin-bottom: 22px; }
+  .sprav-lead { color: var(--ink-2); font-size: 16px; max-width: 62ch; margin: -14px 0 30px; }
+  .empty { color: var(--ink-2); font-size: 15.5px; }
+
+  /* Алфавитный список */
+  .letter-group { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px 16px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .letter-group:first-child { border-top: 0; }
+  .letter {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 15px; font-weight: 700; color: var(--accent-strong);
+    padding-top: 8px;
+  }
+  .letter-group ul { list-style: none; margin: 0; padding: 0; }
+  .letter-group li { border-bottom: 1px solid var(--line); }
+  .letter-group li:last-child { border-bottom: 0; }
+  .letter-group a {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+    padding: 11px 2px; color: inherit;
+  }
+  .letter-group a .t { font-size: 16.5px; font-weight: 600; }
+  .letter-group a:hover .t { color: var(--accent-strong); }
+  .letter-group a .k {
+    flex: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3);
+  }
+
+  @media (max-width: 560px) {
+    .letter-group { grid-template-columns: 30px minmax(0, 1fr); gap: 6px 10px; }
+    .letter { font-size: 13px; padding-top: 9px; }
+  }
+</style>

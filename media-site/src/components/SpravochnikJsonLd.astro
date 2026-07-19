@@ -1,0 +1,71 @@
+---
+// JSON-LD для материала Базы знаний — собирается детерминированно из facts+type
+// (решение владельца: разметку строит сайт, а не LLM во фронт-маттере).
+// company/organization → Organization, technology → SoftwareApplication,
+// term → DefinedTerm. Плюс BreadcrumbList. Приём вставки — как в article/[...slug].astro.
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'spravochnik'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const url = new URL(`/spravochnik/${entry.id}/`, Astro.site).href;
+const dateModified = (data.updatedDate ?? data.pubDate).toISOString();
+
+let node: Record<string, unknown>;
+if (data.type === 'company' || data.type === 'organization') {
+  const f = data.facts;
+  const founders =
+    data.type === 'company'
+      ? f.founders.map((n) => ({ '@type': 'Person', name: n }))
+      : undefined;
+  node = {
+    '@type': 'Organization',
+    name: data.title,
+    ...(data.aliases.length ? { alternateName: data.aliases } : {}),
+    ...(f.founded ? { foundingDate: String(f.founded) } : {}),
+    ...(founders && founders.length ? { founders } : {}),
+    ...(data.type === 'company' && f.hq
+      ? { address: { '@type': 'PostalAddress', addressLocality: f.hq } }
+      : {}),
+    ...(data.type === 'company' && f.ticker ? { tickerSymbol: f.ticker } : {}),
+    ...(data.type === 'organization' ? { description: data.description } : {}),
+    url: f.official_url,
+  };
+} else if (data.type === 'technology') {
+  const f = data.facts;
+  node = {
+    '@type': 'SoftwareApplication',
+    name: data.title,
+    applicationCategory: 'AdvertisingApplication',
+    operatingSystem: 'Web',
+    ...(f.developer ? { creator: { '@type': 'Organization', name: f.developer } } : {}),
+    ...(f.launch_date ? { releaseDate: String(f.launch_date) } : {}),
+    url: f.official_url,
+  };
+} else {
+  node = {
+    '@type': 'DefinedTerm',
+    name: data.title,
+    description: data.description,
+    inDefinedTermSet: { '@type': 'DefinedTermSet', name: 'База знаний 1screen.ru' },
+  };
+}
+
+const jsonLd = { '@context': 'https://schema.org', ...node, dateModified };
+
+const breadcrumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL('/', Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: 'База знаний', item: new URL('/spravochnik/', Astro.site).href },
+    { '@type': 'ListItem', position: 3, name: data.title, item: url },
+  ],
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbsLd)} />

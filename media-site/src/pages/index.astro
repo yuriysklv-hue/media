@@ -5,6 +5,7 @@ import { getCollection, getEntry } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleListItem from '../components/ArticleListItem.astro';
+import SpravochnikWidget from '../components/SpravochnikWidget.astro';
 import { ARTICLE_COLLECTIONS, formatGeo, type ArticleCollection } from '../lib/sections';
 import { formatCategory } from '../lib/categories';
 import { formatDate, formatReadingTime, formatRelative } from '../lib/format';
@@ -111,6 +112,7 @@ const isLive = (d: Date) => now.getTime() - d.getTime() < 3 * 3_600_000;
               ))}
             </ol>
           </div>
+          <SpravochnikWidget />
         </aside>
       </div>
     </div>

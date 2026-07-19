@@ -2,6 +2,7 @@
 // Генерируется при сборке: разделы — из справочника рубрик, ключевые материалы —
 // featured + свежие отчёты/обзоры из коллекций.
 import type { APIContext } from 'astro';
+import { getCollection } from 'astro:content';
 import { getAllArticles, articleUrl } from '../lib/content';
 import { ARTICLE_COLLECTIONS, SECTIONS } from '../lib/sections';
 
@@ -12,6 +13,11 @@ export async function GET(context: APIContext) {
     ...all.filter((e) => e.data.featured),
     ...all.filter((e) => !e.data.featured && (e.collection === 'reports' || e.collection === 'reviews')),
   ].slice(0, 5);
+
+  // База знаний — вечнозелёный справочник adtech (стартовая точка для LLM).
+  const sprav = (await getCollection('spravochnik')).sort(
+    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  );
 
   const lines = [
     '# 1screen.ru',
@@ -31,6 +37,10 @@ export async function GET(context: APIContext) {
     '',
     '## Ключевые материалы (стартовая точка для LLM)',
     ...key.map((e) => `- [${e.data.title}](${articleUrl(e, site)})`),
+    '',
+    '## База знаний (справочник adtech)',
+    `Вечнозелёный справочник по рекламным технологиям: компании, технологии, термины и организации. Индекс: ${new URL('/spravochnik/', site).href}`,
+    ...sprav.slice(0, 20).map((e) => `- [${e.data.title}](${new URL(`/spravochnik/${e.id}/`, site).href})`),
     '',
     '## Контакты и правила цитирования',
     `- Сайт: ${site.href}`,
